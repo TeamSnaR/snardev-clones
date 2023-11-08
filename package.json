@@ -2,7 +2,9 @@
   "name": "@snardev-clones/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "affected:xerogo": "nx affected -t build,test,lint --base=origin/main --head=HEAD"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "~16.2.0",
