@@ -1,6 +1,4 @@
 import { Route } from '@angular/router';
 import { AppShellComponent } from './app-shell.component';
 
-export const appShellRoutes: Route[] = [
-  { path: '', component: AppShellComponent },
-];
+export const appRoutes: Route[] = [{ path: '', component: AppShellComponent }];

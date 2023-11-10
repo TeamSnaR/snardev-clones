@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { AppShellComponent } from '@snardev-clones/pmb/app-shell';
 
 @Component({
   standalone: true,
-  imports: [AppShellComponent, RouterModule],
+  imports: [AppShellComponent, RouterOutlet],
   selector: 'pmb-root',
-  template: ` <pmb-app-shell></pmb-app-shell> `,
+  template: ` <router-outlet></router-outlet> `,
   styles: [''],
 })
 export class AppComponent {
