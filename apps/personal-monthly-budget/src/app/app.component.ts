@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NxWelcomeComponent } from './nx-welcome.component';
+import { AppShellComponent } from '@snardev-clones/pmb/app-shell';
 
 @Component({
   standalone: true,
-  imports: [NxWelcomeComponent, RouterModule],
+  imports: [AppShellComponent, RouterModule],
   selector: 'pmb-root',
-  template: `<pmb-nx-welcome></pmb-nx-welcome> <router-outlet></router-outlet>`,
+  template: ` <pmb-app-shell></pmb-app-shell> `,
   styles: [''],
 })
 export class AppComponent {
