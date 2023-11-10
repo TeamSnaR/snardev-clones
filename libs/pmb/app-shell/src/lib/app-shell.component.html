@@ -1,0 +1,66 @@
+<h1>Personal monthly budget</h1>
+
+<div>
+  <div>
+    <div>Projected income: {{ projectedIncome() | currency }}</div>
+    <div>Actual income: {{ actualIncome() | currency }}</div>
+    <div>Difference: {{ differenceIncome() | currency }}</div>
+  </div>
+  <div>
+    <div>Projected expenses: {{ projectedExpenses() | currency }}</div>
+    <div>Actual expenses: {{ actualExpenses() | currency }}</div>
+    <div>Difference: {{ differenceExpenses() | currency }}</div>
+  </div>
+  <div>
+    <div>Projected balance: {{ projectedBalance() | currency }}</div>
+    <div>Actual balance: {{ actualBalance() | currency }}</div>
+    <div>Actual-Projected: {{ actualProjectedBalance() | currency }}</div>
+  </div>
+  <div>
+    <h2>Expenses</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Projected</th>
+          <th>Actual</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let expense of expenses()">
+          <td>{{ expense.category }}</td>
+          <td>{{ expense.projected | currency }}</td>
+          <td>{{ expense.actual | currency }}</td>
+          <td>{{ expense.difference | currency }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button type="button" (click)="addExpense()">Add expense</button>
+  </div>
+  <div>
+    <h2>Income</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Projected</th>
+          <th>Actual</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let income of incomes()">
+          <td>{{ income.category }}</td>
+          <td>{{ income.projected | currency }}</td>
+          <td>{{ income.actual | currency }}</td>
+          <td>{{ income.difference | currency }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" (click)="addIncome()">Add income</button>
+  </div>
+</div>
+
+<router-outlet></router-outlet>
