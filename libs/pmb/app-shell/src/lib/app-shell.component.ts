@@ -3,7 +3,6 @@ import {
   Component,
   Injectable,
   computed,
-  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -98,44 +97,39 @@ export class AppShellComponent {
   });
 
   constructor() {
-    effect(
-      () => {
-        // this.incomes.set([
-        //   {
-        //     id: '1',
-        //     category: 'Salary',
-        //     projected: 100,
-        //     actual: 100,
-        //     difference: 0,
-        //   },
-        // ]);
-
-        this.expenses.set([
-          {
-            id: '1',
-            category: 'Rent',
-            projected: 100,
-            actual: 100,
-            difference: 0,
-          },
-          {
-            id: '2',
-            category: 'Food',
-            projected: 100,
-            actual: 100,
-            difference: 0,
-          },
-          {
-            id: '3',
-            category: 'Entertainment',
-            projected: 100,
-            actual: 100,
-            difference: 0,
-          },
-        ]);
+    this.incomes.set([
+      {
+        id: '1',
+        category: 'Salary',
+        projected: 100,
+        actual: 100,
+        difference: 0,
       },
-      { allowSignalWrites: true }
-    );
+    ]);
+
+    this.expenses.set([
+      {
+        id: '1',
+        category: 'Rent',
+        projected: 100,
+        actual: 100,
+        difference: 0,
+      },
+      {
+        id: '2',
+        category: 'Food',
+        projected: 100,
+        actual: 100,
+        difference: 0,
+      },
+      {
+        id: '3',
+        category: 'Entertainment',
+        projected: 100,
+        actual: 100,
+        difference: 0,
+      },
+    ]);
   }
 
   addIncome() {
