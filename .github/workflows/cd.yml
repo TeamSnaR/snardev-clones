@@ -7,10 +7,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v2.1.1
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: ci.yml
+          # Optional, will use the specified branch. Defaults to all branches
+          branch: main
           name: pmb-artifacts
+          # Optional, a directory where to extract artifact(s), defaults to the current directory
           path: pmb-artifacts
 
       - name: SCP Command to Transfer Files
@@ -25,5 +30,19 @@ jobs:
           username: ${{ secrets.DEPLOYER_USER }}
           # ssh password
           password: ${{ secrets.DEPLOYER_PW }}
-          source: snarbank-artifacts
+          source: pmb-artifacts
           target: ${{ secrets.DESTINATION_TMP_DIR }}
+      - name: Deploy app bits
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.DESTINATION_HOST }}
+          # ssh port
+          port: ${{ secrets.DESTINATION_PORT }}
+          # ssh username
+          username: ${{ secrets.DEPLOYER_USER }}
+          # ssh password
+          password: ${{ secrets.DEPLOYER_PW }}
+          script_stop: true
+          script: |
+            rm -rfv ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app/*
+            cp -r -f ${{ secrets.DESTINATION_TMP_DIR }}/pmb-artifacts/personal-monthly-budget/browser/* ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app
