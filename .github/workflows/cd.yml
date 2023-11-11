@@ -32,3 +32,17 @@ jobs:
           password: ${{ secrets.DEPLOYER_PW }}
           source: pmb-artifacts
           target: ${{ secrets.DESTINATION_TMP_DIR }}
+      - name: Deploy app bits
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.DESTINATION_HOST }}
+          # ssh port
+          port: ${{ secrets.DESTINATION_PORT }}
+          # ssh username
+          username: ${{ secrets.DEPLOYER_USER }}
+          # ssh password
+          password: ${{ secrets.DEPLOYER_PW }}
+          script_stop: true
+          script: |
+            rm -rfv ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app/*
+            cp -r -f ${{ secrets.DESTINATION_TMP_DIR }}/pmb-artifacts/personal-monthly-budget/browser/* ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app
