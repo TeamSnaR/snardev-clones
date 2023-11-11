@@ -1,0 +1,27 @@
+{
+  "name": "pmb-app-shell",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/pmb/app-shell/src",
+  "prefix": "pmb",
+  "tags": ["scope:personal-monthly-budget", "type:shell"],
+  "projectType": "library",
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/pmb/app-shell/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/pmb/app-shell/**/*.ts",
+          "libs/pmb/app-shell/**/*.html"
+        ]
+      }
+    }
+  }
+}
