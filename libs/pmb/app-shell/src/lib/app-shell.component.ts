@@ -36,13 +36,6 @@ export type IncomeWithDifference = Income & {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './app-shell.component.html',
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-    `,
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppShellComponent {
@@ -107,29 +100,29 @@ export class AppShellComponent {
       },
     ]);
 
-    this.expenses.set([
-      {
-        id: '1',
-        category: 'Rent',
-        projected: 100,
-        actual: 100,
-        difference: 0,
-      },
-      {
-        id: '2',
-        category: 'Food',
-        projected: 100,
-        actual: 100,
-        difference: 0,
-      },
-      {
-        id: '3',
-        category: 'Entertainment',
-        projected: 100,
-        actual: 100,
-        difference: 0,
-      },
-    ]);
+    // this.expenses.set([
+    //   {
+    //     id: '1',
+    //     category: 'Rent',
+    //     projected: 100,
+    //     actual: 100,
+    //     difference: 0,
+    //   },
+    //   {
+    //     id: '2',
+    //     category: 'Food',
+    //     projected: 100,
+    //     actual: 100,
+    //     difference: 0,
+    //   },
+    //   {
+    //     id: '3',
+    //     category: 'Entertainment',
+    //     projected: 100,
+    //     actual: 100,
+    //     difference: 0,
+    //   },
+    // ]);
   }
 
   addIncome() {
