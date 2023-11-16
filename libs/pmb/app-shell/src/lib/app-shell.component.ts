@@ -10,6 +10,7 @@ import { CommonModule, JsonPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { concatMap, delay, filter, of, take, tap } from 'rxjs';
+import { IncomeListComponent } from '@snardev-clones/pmb/shared/ui/income-list';
 
 export type Expense = {
   id: string;
@@ -34,7 +35,7 @@ export type IncomeWithDifference = Income & {
 @Component({
   selector: 'pmb-app-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, IncomeListComponent],
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
