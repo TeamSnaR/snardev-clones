@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { concatMap, delay, filter, of, take, tap } from 'rxjs';
 import { IncomeListComponent } from '@snardev-clones/pmb/shared/ui/income-list';
+import { ExpenseListComponent } from '@snardev-clones/pmb/shared/ui/expense-list';
 
 export type Expense = {
   id: string;
@@ -35,7 +36,12 @@ export type IncomeWithDifference = Income & {
 @Component({
   selector: 'pmb-app-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, IncomeListComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    IncomeListComponent,
+    ExpenseListComponent,
+  ],
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -101,29 +107,36 @@ export class AppShellComponent {
       },
     ]);
 
-    // this.expenses.set([
-    //   {
-    //     id: '1',
-    //     category: 'Rent',
-    //     projected: 100,
-    //     actual: 100,
-    //     difference: 0,
-    //   },
-    //   {
-    //     id: '2',
-    //     category: 'Food',
-    //     projected: 100,
-    //     actual: 100,
-    //     difference: 0,
-    //   },
-    //   {
-    //     id: '3',
-    //     category: 'Entertainment',
-    //     projected: 100,
-    //     actual: 100,
-    //     difference: 0,
-    //   },
-    // ]);
+    this.expenses.set([
+      {
+        id: '1',
+        category: 'Housing',
+        projected: 100,
+        actual: 100,
+        difference: 0,
+      },
+      {
+        id: 'abc',
+        category: 'Housing',
+        projected: 150,
+        actual: 140,
+        difference: 10,
+      },
+      {
+        id: '2',
+        category: 'Food',
+        projected: 100,
+        actual: 100,
+        difference: 0,
+      },
+      {
+        id: '3',
+        category: 'Entertainment',
+        projected: 100,
+        actual: 100,
+        difference: 0,
+      },
+    ]);
   }
 
   addIncome() {

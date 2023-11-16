@@ -17,6 +17,9 @@
     "paths": {
       "@snardev-clones/pmb/app-shell": ["libs/pmb/app-shell/src/index.ts"],
       "@snardev-clones/pmb/shared/ui": ["libs/pmb/shared/ui/src/index.ts"],
+      "@snardev-clones/pmb/shared/ui/expense-list": [
+        "libs/pmb/shared/ui/expense-list/src/index.ts"
+      ],
       "@snardev-clones/pmb/shared/ui/income-list": [
         "libs/pmb/shared/ui/income-list/src/index.ts"
       ]

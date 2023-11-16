@@ -38,7 +38,9 @@
           "libs/pmb/shared/ui/**/*.html",
           "libs/pmb/shared/ui/package.json",
           "libs/pmb/shared/ui/income-list/**/*.ts",
-          "libs/pmb/shared/ui/income-list/**/*.html"
+          "libs/pmb/shared/ui/income-list/**/*.html",
+          "libs/pmb/shared/ui/expense-list/**/*.ts",
+          "libs/pmb/shared/ui/expense-list/**/*.html"
         ]
       }
     }
