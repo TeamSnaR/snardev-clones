@@ -2,18 +2,35 @@ import {
   ChangeDetectionStrategy,
   Component,
   Injectable,
+  Pipe,
   computed,
   inject,
   signal,
+  PipeTransform,
 } from '@angular/core';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, JsonPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { concatMap, delay, filter, of, take, tap } from 'rxjs';
 import { IncomeListComponent } from '@snardev-clones/pmb/shared/ui/income-list';
 import { ExpenseListComponent } from '@snardev-clones/pmb/shared/ui/expense-list';
-import { Budget, Expense, Income } from '@snardev-clones/pmb/shared/models';
-
+import {
+  Budget,
+  Expense,
+  Income,
+  Money,
+} from '@snardev-clones/pmb/shared/models';
+@Pipe({
+  name: 'currencyExtended',
+  pure: true,
+  standalone: true,
+})
+export class CurrencyExtendedPipe implements PipeTransform {
+  currencyPipe = inject(CurrencyPipe);
+  transform(value: Money) {
+    return this.currencyPipe.transform(value.amount, value.currency);
+  }
+}
 @Injectable()
 export class BudgetService {
   budget = signal<Budget>({
@@ -173,18 +190,31 @@ export class BudgetService {
   });
 
   projection = computed(() => {
-    const totalProjectedIncome =
-      this.budget()?.incomes.reduce(
-        (acc, income) => acc + income.projected.amount,
-        0
-      ) ?? 0;
-    const totalProjectedExpenses =
-      this.budget()?.expenses.reduce(
-        (acc, expense) => acc + expense.projected.amount,
-        0
-      ) ?? 0;
-    const totalProjection = totalProjectedIncome - totalProjectedExpenses;
-    const badge = totalProjection > 0 ? 'surplus' : 'deficit';
+    const totalProjectedIncome = this.budget()?.incomes.reduce(
+      (acc, income) => ({
+        ...acc,
+        amount: acc.amount + income.projected.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalProjectedExpenses = this.budget()?.expenses.reduce(
+      (acc, expense) => ({
+        ...acc,
+        amount: acc.amount + expense.projected.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalProjection = {
+      amount: totalProjectedIncome.amount - totalProjectedExpenses.amount,
+      currency: 'GBP',
+    };
+    const badge = totalProjection.amount > 0 ? 'surplus' : 'deficit';
 
     return {
       totalProjectedIncome,
@@ -195,18 +225,31 @@ export class BudgetService {
   });
 
   actual = computed(() => {
-    const totalActualIncome =
-      this.budget()?.incomes.reduce(
-        (acc, income) => acc + income.actual.amount,
-        0
-      ) ?? 0;
-    const totalActualExpenses =
-      this.budget()?.expenses.reduce(
-        (acc, expense) => acc + expense.actual.amount,
-        0
-      ) ?? 0;
-    const totalActual = totalActualIncome - totalActualExpenses;
-    const badge = totalActual > 0 ? 'surplus' : 'deficit';
+    const totalActualIncome = this.budget()?.incomes.reduce(
+      (acc, income) => ({
+        ...acc,
+        amount: acc.amount + income.actual.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalActualExpenses = this.budget()?.expenses.reduce(
+      (acc, expense) => ({
+        ...acc,
+        amount: acc.amount + expense.actual.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalActual = {
+      amount: totalActualIncome.amount - totalActualExpenses.amount,
+      currency: 'GBP',
+    };
+    const badge = totalActual.amount > 0 ? 'surplus' : 'deficit';
     return {
       totalActualIncome,
       totalActualExpenses,
@@ -217,7 +260,12 @@ export class BudgetService {
 
   balanceDifference = computed(() => {
     return {
-      total: this.actual().totalActual - this.projection().totalProjection,
+      total: {
+        amount:
+          this.actual().totalActual.amount -
+          this.projection().totalProjection.amount,
+        currency: 'GBP',
+      },
     };
   });
 
@@ -286,10 +334,11 @@ export class BudgetService {
     RouterModule,
     IncomeListComponent,
     ExpenseListComponent,
+    CurrencyExtendedPipe,
   ],
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [BudgetService],
+  viewProviders: [BudgetService, CurrencyPipe],
 })
 export class AppShellComponent {
   #dialog = inject(Dialog);

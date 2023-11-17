@@ -2,7 +2,7 @@
 
 <div>
   <h2>Hello, Carl</h2>
-  <div>Your budget for {{ viewModel.budget()?.date | date : 'MMMM yyyy' }}</div>
+  <div>Your budget for {{ viewModel.budget().date | date : 'MMMM yyyy' }}</div>
 </div>
 
 <div>
@@ -10,10 +10,10 @@
 
   <div
     [ngStyle]="{
-      color: viewModel.projection().totalProjection < 0 ? 'red' : 'green'
+      color: viewModel.projection().totalProjection.amount < 0 ? 'red' : 'green'
     }"
   >
-    {{ viewModel.projection().totalProjection }}
+    {{ viewModel.projection().totalProjection | currencyExtended }}
   </div>
 
   <div>
@@ -22,19 +22,19 @@
         color: 'green'
       }"
     >
-      {{ viewModel.projection().totalProjectedIncome }}
+      {{ viewModel.projection().totalProjectedIncome | currencyExtended }}
     </div>
     <div
       [ngStyle]="{
         color: 'red'
       }"
     >
-      {{ viewModel.projection().totalProjectedExpenses }}
+      {{ viewModel.projection().totalProjectedExpenses | currencyExtended }}
     </div>
   </div>
   <div
     [ngStyle]="{
-      color: viewModel.projection().totalProjection < 0 ? 'red' : 'green'
+      color: viewModel.projection().totalProjection.amount < 0 ? 'red' : 'green'
     }"
   >
     {{ viewModel.projection().badge }}
@@ -44,10 +44,10 @@
   <h2>Actual</h2>
   <div
     [ngStyle]="{
-      color: viewModel.actual().totalActual < 0 ? 'red' : 'green'
+      color: viewModel.actual().totalActual.amount < 0 ? 'red' : 'green'
     }"
   >
-    {{ viewModel.actual().totalActual }}
+    {{ viewModel.actual().totalActual | currencyExtended }}
   </div>
   <div>
     <div
@@ -55,20 +55,20 @@
         color: 'green'
       }"
     >
-      {{ viewModel.actual().totalActualIncome }}
+      {{ viewModel.actual().totalActualIncome | currencyExtended }}
     </div>
     <div
       [ngStyle]="{
         color: 'red'
       }"
     >
-      {{ viewModel.actual().totalActualExpenses }}
+      {{ viewModel.actual().totalActualExpenses | currencyExtended }}
     </div>
   </div>
 
   <div
     [ngStyle]="{
-      color: viewModel.actual().totalActual < 0 ? 'red' : 'green'
+      color: viewModel.actual().totalActual.amount < 0 ? 'red' : 'green'
     }"
   >
     {{ viewModel.actual().badge }}
@@ -80,10 +80,10 @@
 
   <div
     [ngStyle]="{
-      color: viewModel.balanceDifference().total < 0 ? 'red' : 'green'
+      color: viewModel.balanceDifference().total.amount < 0 ? 'red' : 'green'
     }"
   >
-    {{ viewModel.balanceDifference().total }}
+    {{ viewModel.balanceDifference().total | currencyExtended }}
   </div>
 
   <!--
