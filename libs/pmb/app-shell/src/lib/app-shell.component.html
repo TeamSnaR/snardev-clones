@@ -22,14 +22,14 @@
         color: 'green'
       }"
     >
-      {{ viewModel.projection().totalProjectedIncome | currencyExtended }}
+      + {{ viewModel.projection().totalProjectedIncome | currencyExtended }}
     </div>
     <div
       [ngStyle]="{
         color: 'red'
       }"
     >
-      {{ viewModel.projection().totalProjectedExpenses | currencyExtended }}
+      - {{ viewModel.projection().totalProjectedExpenses | currencyExtended }}
     </div>
   </div>
   <div
@@ -55,14 +55,14 @@
         color: 'green'
       }"
     >
-      {{ viewModel.actual().totalActualIncome | currencyExtended }}
+      + {{ viewModel.actual().totalActualIncome | currencyExtended }}
     </div>
     <div
       [ngStyle]="{
         color: 'red'
       }"
     >
-      {{ viewModel.actual().totalActualExpenses | currencyExtended }}
+      - {{ viewModel.actual().totalActualExpenses | currencyExtended }}
     </div>
   </div>
 

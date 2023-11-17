@@ -56,7 +56,7 @@ export class BudgetService {
           currency: 'GBP',
         },
         actual: {
-          amount: 80,
+          amount: 100,
           currency: 'GBP',
         },
         difference: {
@@ -71,11 +71,11 @@ export class BudgetService {
         id: '1',
         category: 'Housing',
         projected: {
-          amount: 100,
+          amount: 50,
           currency: 'GBP',
         },
         actual: {
-          amount: 90,
+          amount: 50,
           currency: 'GBP',
         },
         difference: {
@@ -122,11 +122,11 @@ export class BudgetService {
         id: '4',
         category: 'Utilities',
         projected: {
-          amount: 100,
+          amount: 50,
           currency: 'GBP',
         },
         actual: {
-          amount: 90,
+          amount: 40,
           currency: 'GBP',
         },
         difference: {
@@ -214,7 +214,12 @@ export class BudgetService {
       amount: totalProjectedIncome.amount - totalProjectedExpenses.amount,
       currency: 'GBP',
     };
-    const badge = totalProjection.amount > 0 ? 'surplus' : 'deficit';
+    const badge =
+      totalProjection.amount > 0
+        ? 'surplus'
+        : totalProjection.amount === 0
+        ? 'balanced'
+        : 'deficit';
 
     return {
       totalProjectedIncome,
@@ -249,7 +254,12 @@ export class BudgetService {
       amount: totalActualIncome.amount - totalActualExpenses.amount,
       currency: 'GBP',
     };
-    const badge = totalActual.amount > 0 ? 'surplus' : 'deficit';
+    const badge =
+      totalActual.amount > 0
+        ? 'surplus'
+        : totalActual.amount === 0
+        ? 'balanced'
+        : 'deficit';
     return {
       totalActualIncome,
       totalActualExpenses,
