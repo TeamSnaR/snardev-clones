@@ -32,7 +32,7 @@ export class CurrencyExtendedPipe implements PipeTransform {
   }
 }
 @Injectable()
-export class BudgetService {
+export class DashboardPresenter {
   budget = signal<Budget>({
     id: '1',
     date: new Date(2023, 10),
@@ -279,6 +279,37 @@ export class BudgetService {
     };
   });
 
+  colors = computed(() => {
+    return {
+      projection:
+        this.projection().badge === 'surplus'
+          ? 'text-green-600'
+          : this.projection().badge === 'balanced'
+          ? 'text-gray-700'
+          : 'text-red-600',
+      actual:
+        this.actual().badge === 'surplus'
+          ? 'text-green-600'
+          : this.actual().badge === 'balanced'
+          ? 'text-gray-700'
+          : 'text-red-600',
+      balance:
+        this.balanceDifference().total.amount > 0
+          ? 'text-green-600'
+          : this.balanceDifference().total.amount > 0
+          ? 'text-gray-700'
+          : 'text-red-600',
+    };
+  });
+
+  viewModel = {
+    budget: this.budget,
+    projection: this.projection,
+    actual: this.actual,
+    balanceDifference: this.balanceDifference,
+    colors: this.colors,
+  };
+
   addIncome(income: Income) {
     return this.#saveIncome(income);
   }
@@ -348,18 +379,13 @@ export class BudgetService {
   ],
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [BudgetService, CurrencyPipe],
+  viewProviders: [DashboardPresenter, CurrencyPipe],
 })
 export class AppShellComponent {
   #dialog = inject(Dialog);
-  #budgetService = inject(BudgetService);
+  #budgetService = inject(DashboardPresenter);
 
-  viewModel = {
-    budget: this.#budgetService.budget,
-    projection: this.#budgetService.projection,
-    actual: this.#budgetService.actual,
-    balanceDifference: this.#budgetService.balanceDifference,
-  };
+  viewModel = this.#budgetService.viewModel;
 
   private openDialog(data: Income | Expense) {
     return this.#dialog.open(EditDialogComponent, {

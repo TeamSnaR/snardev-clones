@@ -8,69 +8,37 @@
 <div>
   <h2>Projection</h2>
 
-  <div
-    [ngStyle]="{
-      color: viewModel.projection().totalProjection.amount < 0 ? 'red' : 'green'
-    }"
-  >
+  <div>
     {{ viewModel.projection().totalProjection | currencyExtended }}
   </div>
 
   <div>
-    <div
-      [ngStyle]="{
-        color: 'green'
-      }"
-    >
+    <div class="text-green-600">
       + {{ viewModel.projection().totalProjectedIncome | currencyExtended }}
     </div>
-    <div
-      [ngStyle]="{
-        color: 'red'
-      }"
-    >
+    <div class="text-red-600">
       - {{ viewModel.projection().totalProjectedExpenses | currencyExtended }}
     </div>
   </div>
-  <div
-    [ngStyle]="{
-      color: viewModel.projection().totalProjection.amount < 0 ? 'red' : 'green'
-    }"
-  >
+  <div [ngClass]="viewModel.colors().projection">
     {{ viewModel.projection().badge }}
   </div>
 </div>
 <div>
   <h2>Actual</h2>
-  <div
-    [ngStyle]="{
-      color: viewModel.actual().totalActual.amount < 0 ? 'red' : 'green'
-    }"
-  >
+  <div [ngClass]="viewModel.colors().actual">
     {{ viewModel.actual().totalActual | currencyExtended }}
   </div>
   <div>
-    <div
-      [ngStyle]="{
-        color: 'green'
-      }"
-    >
+    <div class="text-green-600">
       + {{ viewModel.actual().totalActualIncome | currencyExtended }}
     </div>
-    <div
-      [ngStyle]="{
-        color: 'red'
-      }"
-    >
+    <div class="text-red-600">
       - {{ viewModel.actual().totalActualExpenses | currencyExtended }}
     </div>
   </div>
 
-  <div
-    [ngStyle]="{
-      color: viewModel.actual().totalActual.amount < 0 ? 'red' : 'green'
-    }"
-  >
+  <div [ngClass]="viewModel.colors().actual">
     {{ viewModel.actual().badge }}
   </div>
 </div>
@@ -78,11 +46,7 @@
 <div>
   <h2>Balance</h2>
 
-  <div
-    [ngStyle]="{
-      color: viewModel.balanceDifference().total.amount < 0 ? 'red' : 'green'
-    }"
-  >
+  <div [ngClass]="viewModel.colors().balance">
     {{ viewModel.balanceDifference().total | currencyExtended }}
   </div>
 
