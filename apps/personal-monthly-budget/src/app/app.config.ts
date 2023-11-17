@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import {
   ApplicationConfig,
   DEFAULT_CURRENCY_CODE,
@@ -11,5 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes),
     { provide: LOCALE_ID, useValue: 'en-GB' },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'GBP' },
+    provideHttpClient(),
   ],
 };
