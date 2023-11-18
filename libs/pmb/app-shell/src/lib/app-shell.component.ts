@@ -2,280 +2,450 @@ import {
   ChangeDetectionStrategy,
   Component,
   Injectable,
+  Pipe,
   computed,
   inject,
   signal,
+  PipeTransform,
 } from '@angular/core';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, JsonPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { concatMap, delay, filter, of, take, tap } from 'rxjs';
+import { IncomeListComponent } from '@snardev-clones/pmb/shared/ui/income-list';
+import { ExpenseListComponent } from '@snardev-clones/pmb/shared/ui/expense-list';
+import {
+  Budget,
+  Expense,
+  Income,
+  Money,
+} from '@snardev-clones/pmb/shared/models';
+@Pipe({
+  name: 'currencyExtended',
+  pure: true,
+  standalone: true,
+})
+export class CurrencyExtendedPipe implements PipeTransform {
+  currencyPipe = inject(CurrencyPipe);
+  transform(value: Money) {
+    return this.currencyPipe.transform(value.amount, value.currency);
+  }
+}
+@Injectable()
+export class DashboardPresenter {
+  budget = signal<Budget>({
+    id: '1',
+    date: new Date(2023, 10),
+    projected: {
+      amount: 100,
+      currency: 'GBP',
+    },
+    actual: {
+      amount: 100,
+      currency: 'GBP',
+    },
+    difference: {
+      amount: 0,
+      currency: 'GBP',
+    },
+    incomes: [
+      {
+        id: '1',
+        projected: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 20,
+          currency: 'GBP',
+        },
+        description: 'Salary',
+      },
+    ],
+    expenses: [
+      {
+        id: '1',
+        category: 'Housing',
+        projected: {
+          amount: 50,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 50,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Rent',
+      },
+      {
+        id: '3',
+        category: 'Housing',
+        projected: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 90,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Council Tax',
+      },
+      {
+        id: '4',
+        category: 'Utilities',
+        projected: {
+          amount: 50,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 40,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Electricity',
+      },
+      {
+        id: '5',
+        category: 'Utilities',
+        projected: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 90,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Gas',
+      },
+      {
+        id: '6',
+        category: 'Utilities',
+        projected: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 90,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Water',
+      },
+    ],
+  });
 
-export type Expense = {
-  id: string;
-  category: string;
-  projected: number;
-  actual: number;
-};
+  projection = computed(() => {
+    const totalProjectedIncome = this.budget()?.incomes.reduce(
+      (acc, income) => ({
+        ...acc,
+        amount: acc.amount + income.projected.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalProjectedExpenses = this.budget()?.expenses.reduce(
+      (acc, expense) => ({
+        ...acc,
+        amount: acc.amount + expense.projected.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalProjection = {
+      amount: totalProjectedIncome.amount - totalProjectedExpenses.amount,
+      currency: 'GBP',
+    };
+    const badge =
+      totalProjection.amount > 0
+        ? 'surplus'
+        : totalProjection.amount === 0
+        ? 'balanced'
+        : 'deficit';
 
-export type ExpenseWithDifference = Expense & {
-  difference: number;
-};
-export type Income = {
-  id: string;
-  category: string;
-  projected: number;
-  actual: number;
-};
-export type IncomeWithDifference = Income & {
-  difference: number;
-};
+    return {
+      totalProjectedIncome,
+      totalProjectedExpenses,
+      totalProjection,
+      badge,
+    };
+  });
+
+  actual = computed(() => {
+    const totalActualIncome = this.budget()?.incomes.reduce(
+      (acc, income) => ({
+        ...acc,
+        amount: acc.amount + income.actual.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalActualExpenses = this.budget()?.expenses.reduce(
+      (acc, expense) => ({
+        ...acc,
+        amount: acc.amount + expense.actual.amount,
+      }),
+      {
+        amount: 0,
+        currency: 'GBP',
+      }
+    );
+    const totalActual = {
+      amount: totalActualIncome.amount - totalActualExpenses.amount,
+      currency: 'GBP',
+    };
+    const badge =
+      totalActual.amount > 0
+        ? 'surplus'
+        : totalActual.amount === 0
+        ? 'balanced'
+        : 'deficit';
+    return {
+      totalActualIncome,
+      totalActualExpenses,
+      totalActual,
+      badge,
+    };
+  });
+
+  balanceDifference = computed(() => {
+    return {
+      total: {
+        amount:
+          this.actual().totalActual.amount -
+          this.projection().totalProjection.amount,
+        currency: 'GBP',
+      },
+    };
+  });
+
+  colors = computed(() => {
+    return {
+      projection:
+        this.projection().badge === 'surplus'
+          ? 'text-green-600'
+          : this.projection().badge === 'balanced'
+          ? 'text-gray-700'
+          : 'text-red-600',
+      actual:
+        this.actual().badge === 'surplus'
+          ? 'text-green-600'
+          : this.actual().badge === 'balanced'
+          ? 'text-gray-700'
+          : 'text-red-600',
+      balance:
+        this.balanceDifference().total.amount > 0
+          ? 'text-green-600'
+          : this.balanceDifference().total.amount > 0
+          ? 'text-gray-700'
+          : 'text-red-600',
+    };
+  });
+
+  groupedExpenses = computed(() => {
+    const groupedExpenses = this.budget().expenses.reduce(
+      (acc, expense) => {
+        if (!acc.categories.includes(expense.category)) {
+          acc.categories.push(expense.category);
+        }
+
+        if (!acc.expenses.has(expense.category)) {
+          acc.expenses.set(expense.category, []);
+        }
+
+        acc.expenses.get(expense.category)?.push(expense);
+
+        return acc;
+      },
+      { categories: [] as string[], expenses: new Map<string, Expense[]>() }
+    );
+
+    return {
+      categories: groupedExpenses.categories,
+      expenses: groupedExpenses.expenses,
+    };
+  });
+
+  viewModel = {
+    budget: this.budget,
+    groupedExpenses: this.groupedExpenses,
+    projection: this.projection,
+    actual: this.actual,
+    balanceDifference: this.balanceDifference,
+    colors: this.colors,
+  };
+
+  addIncome(income: Income) {
+    return this.#saveIncome(income);
+  }
+
+  editIncome(income: Income) {
+    return this.#saveIncome(income);
+  }
+
+  #saveIncome(income: Income) {
+    return of(income).pipe(
+      tap(() => console.log(JSON.stringify(income), ' saved')),
+      delay(1000),
+      tap((income) =>
+        this.budget.update((budget) => ({
+          ...budget,
+          incomes: [...budget.incomes, income],
+        }))
+      )
+    );
+  }
+
+  removeIncome(id: string) {
+    return of(id).pipe(
+      tap(() => console.log(id, ' removed')),
+      delay(1000)
+    );
+  }
+
+  addExpense(expense: Expense) {
+    return this.#saveExpense(expense);
+  }
+
+  editExpense(expense: Expense) {
+    return this.#saveExpense(expense);
+  }
+
+  #saveExpense(expense: Expense) {
+    return of(expense).pipe(
+      tap(() => console.log(JSON.stringify(expense), ' saved')),
+      delay(1000),
+      tap((expense) => {
+        this.budget.update((budget) => ({
+          ...budget,
+          expenses: [...budget.expenses, expense],
+        }));
+      })
+    );
+  }
+
+  removeExpense(id: string) {
+    return of(id).pipe(
+      tap(() => console.log(id, ' removed')),
+      delay(1000)
+    );
+  }
+}
 
 @Component({
   selector: 'pmb-app-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './app-shell.component.html',
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-    `,
+  imports: [
+    CommonModule,
+    RouterModule,
+    IncomeListComponent,
+    ExpenseListComponent,
+    CurrencyExtendedPipe,
   ],
+  templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [DashboardPresenter, CurrencyPipe],
 })
 export class AppShellComponent {
   #dialog = inject(Dialog);
-  #budgetService = inject(BudgetService);
-  expenses = signal([] as ExpenseWithDifference[]);
-  incomes = signal([] as IncomeWithDifference[]);
+  #budgetService = inject(DashboardPresenter);
 
-  projectedIncome = computed(() => {
-    return this.incomes().reduce(
-      (total, income) => total + income.projected,
-      0
-    );
-  });
+  viewModel = this.#budgetService.viewModel;
 
-  actualIncome = computed(() => {
-    return this.incomes().reduce((total, income) => total + income.actual, 0);
-  });
-
-  differenceIncome = computed(() => {
-    return this.actualIncome() - this.projectedIncome();
-  });
-
-  projectedExpenses = computed(() => {
-    return this.expenses().reduce(
-      (total, expense) => total + expense.projected,
-      0
-    );
-  });
-
-  actualExpenses = computed(() => {
-    return this.expenses().reduce(
-      (total, expense) => total + expense.actual,
-      0
-    );
-  });
-
-  differenceExpenses = computed(() => {
-    return this.actualExpenses() - this.projectedExpenses();
-  });
-
-  projectedBalance = computed(() => {
-    return this.projectedIncome() - this.projectedExpenses();
-  });
-
-  actualBalance = computed(() => {
-    return this.actualIncome() - this.actualExpenses();
-  });
-
-  actualProjectedBalance = computed(() => {
-    return this.actualBalance() - this.projectedBalance();
-  });
-
-  constructor() {
-    this.incomes.set([
-      {
-        id: '1',
-        category: 'Salary',
-        projected: 100,
-        actual: 100,
-        difference: 0,
-      },
-    ]);
-
-    this.expenses.set([
-      {
-        id: '1',
-        category: 'Rent',
-        projected: 100,
-        actual: 100,
-        difference: 0,
-      },
-      {
-        id: '2',
-        category: 'Food',
-        projected: 100,
-        actual: 100,
-        difference: 0,
-      },
-      {
-        id: '3',
-        category: 'Entertainment',
-        projected: 100,
-        actual: 100,
-        difference: 0,
-      },
-    ]);
+  private openDialog(data: Income | Expense) {
+    return this.#dialog.open(EditDialogComponent, {
+      data: data,
+    });
   }
 
   addIncome() {
-    const ref = this.openDialog({
-      id: Math.random().toString(36).substring(2, 15),
-      category: 'Dividend',
-      projected: Math.random() * 100,
-      actual: Math.random() * 100,
-    });
-
-    ref.closed
-      .pipe(
-        take(1),
-        filter(Boolean),
-        concatMap((data) => this.#budgetService.addIncome(data as Income))
-      )
-      .subscribe((data) => {
-        const randomIncome = data as Income;
-        const randomIncomeWithDifference: IncomeWithDifference = {
-          ...randomIncome,
-          difference: randomIncome.actual - randomIncome.projected,
-        };
-
-        this.incomes.update((incomes) => [
-          ...incomes,
-          randomIncomeWithDifference,
-        ]);
-      });
-  }
-
-  editIncome(income: IncomeWithDifference) {
+    const income: Income = {
+      id: Math.random().toString(),
+      projected: {
+        amount: Math.floor(Math.random() * 100) + 1,
+        currency: 'GBP',
+      },
+      actual: {
+        amount: Math.floor(Math.random() * 100) + 1,
+        currency: 'GBP',
+      },
+      difference: {
+        amount: 0,
+        currency: 'GBP',
+      },
+      description: 'Dividend',
+    };
     const ref = this.openDialog(income);
 
     ref.closed
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((data) => this.#budgetService.editIncome(data as Income))
+        concatMap((result) => this.#budgetService.addIncome(result as Income))
       )
-      .subscribe((data) => {
-        const updatedIncome = data as IncomeWithDifference;
-        this.incomes.update((incomes) =>
-          incomes.map((i) =>
-            i.id === updatedIncome.id
-              ? { ...updatedIncome, projected: updatedIncome.projected + 2 }
-              : i
-          )
-        );
-      });
-  }
-
-  private openDialog(data: unknown) {
-    return this.#dialog.open(EditIncomeDialogComponent, {
-      data: data,
-    });
+      .subscribe();
   }
 
   addExpense() {
-    const randomExpense: Expense = {
-      id: Math.random().toString(36).substring(2, 15),
-      category: 'Groceries',
-      projected: Math.random() * 100,
-      actual: Math.random() * 100,
+    const expense: Expense = {
+      id: Math.random().toString(),
+      category: 'Entertainment',
+      description: 'Spotify',
+      projected: {
+        amount: Math.floor(Math.random() * 100) + 1,
+        currency: 'GBP',
+      },
+      actual: {
+        amount: Math.floor(Math.random() * 100) + 1,
+        currency: 'GBP',
+      },
+      difference: {
+        amount: 0,
+        currency: 'GBP',
+      },
     };
-
-    const ref = this.openDialog(randomExpense);
-    ref.closed
-      .pipe(
-        take(1),
-        filter(Boolean),
-        concatMap((data) => this.#budgetService.addExpense(data as Expense))
-      )
-      .subscribe((data) => {
-        const randomExpense = data as Expense;
-        const randomExpenseWithDifference: ExpenseWithDifference = {
-          ...randomExpense,
-          difference: randomExpense.actual - randomExpense.projected,
-        };
-
-        this.expenses.update((expenses) => [
-          ...expenses,
-          randomExpenseWithDifference,
-        ]);
-      });
-  }
-
-  editExpense(expense: ExpenseWithDifference) {
     const ref = this.openDialog(expense);
+
     ref.closed
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((data) => this.#budgetService.editExpense(data as Expense))
+        concatMap((result) => this.#budgetService.addExpense(result as Expense))
       )
-      .subscribe((data) => {
-        const updatedExpense = data as ExpenseWithDifference;
-        this.expenses.update((expenses) =>
-          expenses.map((e) =>
-            e.id === updatedExpense.id
-              ? { ...updatedExpense, projected: updatedExpense.projected + 2 }
-              : e
-          )
-        );
-      });
+      .subscribe();
   }
 
-  deleteExpense(id: string) {
-    const ref = this.#dialog.open(AlertComponent, {
-      data: {
-        id,
-        message: 'Are you sure you want to delete this expense?',
-      },
-    });
-
-    ref.closed
-      .pipe(
-        take(1),
-        filter(Boolean),
-        concatMap((data) => this.#budgetService.removeExpense(data as string))
-      )
-      .subscribe((id) => {
-        this.expenses.update((expenses) =>
-          expenses.filter((expense) => expense.id !== id)
-        );
-      });
+  removeExpense(id: string) {
+    console.log(id);
   }
-
-  deleteIncome(id: string) {
-    const ref = this.#dialog.open(AlertComponent, {
-      data: {
-        id,
-        message: 'Are you sure you want to delete this income?',
-      },
-    });
-
-    ref.closed
-      .pipe(
-        take(1),
-        filter(Boolean),
-        concatMap((data) => this.#budgetService.removeIncome(data as string))
-      )
-      .subscribe((id) => {
-        this.incomes.update((incomes) =>
-          incomes.filter((income) => income.id !== id)
-        );
-      });
+  removeIncome(id: string) {
+    console.log(id);
   }
 }
 
@@ -341,54 +511,7 @@ export class AlertComponent {
   imports: [JsonPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditIncomeDialogComponent {
+export class EditDialogComponent {
   dialogData = inject(DIALOG_DATA);
   dialogRef = inject(DialogRef);
-}
-
-@Injectable({ providedIn: 'root' })
-export class BudgetService {
-  addIncome(income: Income) {
-    return this.#saveIncome(income);
-  }
-
-  editIncome(income: Income) {
-    return this.#saveIncome(income);
-  }
-
-  #saveIncome(income: Income) {
-    return of(income).pipe(
-      tap(() => console.log(JSON.stringify(income), ' saved')),
-      delay(1000)
-    );
-  }
-
-  removeIncome(id: string) {
-    return of(id).pipe(
-      tap(() => console.log(id, ' removed')),
-      delay(1000)
-    );
-  }
-
-  addExpense(expense: Expense) {
-    return this.#saveExpense(expense);
-  }
-
-  editExpense(expense: Expense) {
-    return this.#saveExpense(expense);
-  }
-
-  #saveExpense(expense: Expense) {
-    return of(expense).pipe(
-      tap(() => console.log(JSON.stringify(expense), ' saved')),
-      delay(1000)
-    );
-  }
-
-  removeExpense(id: string) {
-    return of(id).pipe(
-      tap(() => console.log(id, ' removed')),
-      delay(1000)
-    );
-  }
 }
