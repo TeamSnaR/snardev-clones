@@ -84,40 +84,23 @@ export class DashboardPresenter {
         },
         description: 'Rent',
       },
-      // {
-      //   id: '2',
-      //   category: 'Housing',
-      //   projected: {
-      //     amount: 100,
-      //     currency: 'GBP',
-      //   },
-      //   actual: {
-      //     amount: 90,
-      //     currency: 'GBP',
-      //   },
-      //   difference: {
-      //     amount: 0,
-      //     currency: 'GBP',
-      //   },
-      //   description: 'Mortgage',
-      // },
-      // {
-      //   id: '3',
-      //   category: 'Housing',
-      //   projected: {
-      //     amount: 100,
-      //     currency: 'GBP',
-      //   },
-      //   actual: {
-      //     amount: 90,
-      //     currency: 'GBP',
-      //   },
-      //   difference: {
-      //     amount: 0,
-      //     currency: 'GBP',
-      //   },
-      //   description: 'Council Tax',
-      // },
+      {
+        id: '3',
+        category: 'Housing',
+        projected: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 90,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Council Tax',
+      },
       {
         id: '4',
         category: 'Utilities',
@@ -135,57 +118,40 @@ export class DashboardPresenter {
         },
         description: 'Electricity',
       },
-      // {
-      //   id: '5',
-      //   category: 'Utilities',
-      //   projected: {
-      //     amount: 100,
-      //     currency: 'GBP',
-      //   },
-      //   actual: {
-      //     amount: 90,
-      //     currency: 'GBP',
-      //   },
-      //   difference: {
-      //     amount: 0,
-      //     currency: 'GBP',
-      //   },
-      //   description: 'Gas',
-      // },
-      // {
-      //   id: '6',
-      //   category: 'Utilities',
-      //   projected: {
-      //     amount: 100,
-      //     currency: 'GBP',
-      //   },
-      //   actual: {
-      //     amount: 90,
-      //     currency: 'GBP',
-      //   },
-      //   difference: {
-      //     amount: 0,
-      //     currency: 'GBP',
-      //   },
-      //   description: 'Water',
-      // },
-      // {
-      //   id: '7',
-      //   category: 'Utilities',
-      //   projected: {
-      //     amount: 100,
-      //     currency: 'GBP',
-      //   },
-      //   actual: {
-      //     amount: 90,
-      //     currency: 'GBP',
-      //   },
-      //   difference: {
-      //     amount: 0,
-      //     currency: 'GBP',
-      //   },
-      //   description: 'Internet',
-      // },
+      {
+        id: '5',
+        category: 'Utilities',
+        projected: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 90,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Gas',
+      },
+      {
+        id: '6',
+        category: 'Utilities',
+        projected: {
+          amount: 100,
+          currency: 'GBP',
+        },
+        actual: {
+          amount: 90,
+          currency: 'GBP',
+        },
+        difference: {
+          amount: 0,
+          currency: 'GBP',
+        },
+        description: 'Water',
+      },
     ],
   });
 
@@ -302,8 +268,33 @@ export class DashboardPresenter {
     };
   });
 
+  groupedExpenses = computed(() => {
+    const groupedExpenses = this.budget().expenses.reduce(
+      (acc, expense) => {
+        if (!acc.categories.includes(expense.category)) {
+          acc.categories.push(expense.category);
+        }
+
+        if (!acc.expenses.has(expense.category)) {
+          acc.expenses.set(expense.category, []);
+        }
+
+        acc.expenses.get(expense.category)?.push(expense);
+
+        return acc;
+      },
+      { categories: [] as string[], expenses: new Map<string, Expense[]>() }
+    );
+
+    return {
+      categories: groupedExpenses.categories,
+      expenses: groupedExpenses.expenses,
+    };
+  });
+
   viewModel = {
     budget: this.budget,
+    groupedExpenses: this.groupedExpenses,
     projection: this.projection,
     actual: this.actual,
     balanceDifference: this.balanceDifference,

@@ -131,7 +131,16 @@
             </tr>
           </thead>
           <tbody>
-            @for(expense of viewModel.budget().expenses; track expense.id) {
+            @for(expenseCategory of viewModel.groupedExpenses().categories;
+            track expenseCategory) {
+            <tr>
+              <th colspan="5">
+                {{ expenseCategory }}
+              </th>
+            </tr>
+            @for(expense of
+            viewModel.groupedExpenses().expenses.get(expenseCategory); track
+            expense.id) {
             <tr>
               <td>{{ expense.description }}</td>
               <td class="text-right">
@@ -162,7 +171,7 @@
                 </button>
               </td>
             </tr>
-            }
+            } }
           </tbody>
         </table>
       </div>
