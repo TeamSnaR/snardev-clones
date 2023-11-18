@@ -415,7 +415,8 @@ export class AppShellComponent {
   addExpense() {
     const expense: Expense = {
       id: Math.random().toString(),
-      category: '',
+      category: 'Entertainment',
+      description: 'Spotify',
       projected: {
         amount: Math.floor(Math.random() * 100) + 1,
         currency: 'GBP',
@@ -428,7 +429,6 @@ export class AppShellComponent {
         amount: 0,
         currency: 'GBP',
       },
-      description: '',
     };
     const ref = this.openDialog(expense);
 
