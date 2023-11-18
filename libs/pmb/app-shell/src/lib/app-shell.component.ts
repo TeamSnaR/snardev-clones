@@ -399,7 +399,7 @@ export class AppShellComponent {
         amount: 0,
         currency: 'GBP',
       },
-      description: '',
+      description: 'Dividend',
     };
     const ref = this.openDialog(income);
 
