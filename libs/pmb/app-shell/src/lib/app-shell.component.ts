@@ -449,6 +449,13 @@ export class AppShellComponent {
       )
       .subscribe();
   }
+
+  removeExpense(id: string) {
+    console.log(id);
+  }
+  removeIncome(id: string) {
+    console.log(id);
+  }
 }
 
 @Component({
