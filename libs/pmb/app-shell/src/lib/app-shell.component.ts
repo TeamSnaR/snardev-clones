@@ -333,7 +333,13 @@ export class DashboardPresenter {
   removeIncome(id: string) {
     return of(id).pipe(
       tap(() => console.log(id, ' removed')),
-      delay(1000)
+      delay(1000),
+      tap((id) =>
+        this.budget.update((budget) => ({
+          ...budget,
+          incomes: budget.incomes.filter((income) => income.id !== id),
+        }))
+      )
     );
   }
 
@@ -474,7 +480,22 @@ export class AppShellComponent {
     console.log(id);
   }
   removeIncome(id: string) {
-    console.log(id);
+    const ref = this.#dialog.open(AlertComponent, {
+      data: {
+        id,
+        message: 'Are you sure you want to delete this income?',
+      },
+    });
+
+    ref.closed
+      .pipe(
+        take(1),
+        filter(Boolean),
+        concatMap((result) =>
+          this.#budgetService.removeIncome(result as string)
+        )
+      )
+      .subscribe();
   }
 }
 
