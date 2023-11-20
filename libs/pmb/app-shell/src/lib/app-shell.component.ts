@@ -20,6 +20,7 @@ import {
   Income,
   Money,
 } from '@snardev-clones/pmb/shared/models';
+import { FormsModule } from '@angular/forms';
 @Pipe({
   name: 'currencyExtended',
   pure: true,
@@ -378,8 +379,8 @@ export class AppShellComponent {
 
   viewModel = this.#budgetService.viewModel;
 
-  private openDialog(data: Income | Expense) {
-    return this.#dialog.open(EditDialogComponent, {
+  private openDialog(data: { title: string; payload: Income | Expense }) {
+    return this.#dialog.open(ManageIncomeComponent, {
       data: data,
     });
   }
@@ -401,7 +402,10 @@ export class AppShellComponent {
       },
       description: 'Dividend',
     };
-    const ref = this.openDialog(income);
+    const ref = this.openDialog({
+      title: 'Add income',
+      payload: income,
+    });
 
     ref.closed
       .pipe(
@@ -430,7 +434,10 @@ export class AppShellComponent {
         currency: 'GBP',
       },
     };
-    const ref = this.openDialog(expense);
+    const ref = this.openDialog({
+      title: 'Add expense',
+      payload: expense,
+    });
 
     ref.closed
       .pipe(
@@ -484,20 +491,51 @@ export class AlertComponent {
 
 @Component({
   template: `
-    <h2>Edit data</h2>
-    <p>
-      {{ dialogData | json }}
-    </p>
+    <h2>{{ dialogData.title }}</h2>
+    <div>
+      <form #incomeForm="ngForm">
+        <div>
+          <label for="description">Description</label>
+          <input
+            type="text"
+            name="description"
+            [ngModel]="viewModel().description"
+          />
+        </div>
+        <div>
+          <label for="projected">Projected</label>
+          <input
+            type="number"
+            name="projectedAmount"
+            [ngModel]="viewModel().projectedAmount"
+          />
+        </div>
+        <div>
+          <label for="actual">Actual</label>
+          <input
+            type="number"
+            name="actualAmount"
+            [ngModel]="viewModel().actualAmount"
+          />
+        </div>
+      </form>
+    </div>
     <div class="flex justify-end">
-      <div>
+      <div class="space-x-4">
         <button
           type="button"
-          class="border"
-          (click)="dialogRef.close(dialogData)"
+          class="rounded-md bg-yellow-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600"
+          (click)="saveIncome(incomeForm.value)"
         >
           Save
         </button>
-        <button type="button" (click)="dialogRef.close()">Cancel</button>
+        <button
+          type="button"
+          (click)="dialogRef.close()"
+          class="rounded-md bg-yellow-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   `,
@@ -508,10 +546,52 @@ export class AlertComponent {
     }
   `,
   standalone: true,
-  imports: [JsonPipe],
+  imports: [JsonPipe, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditDialogComponent {
+export class ManageIncomeComponent {
   dialogData = inject(DIALOG_DATA);
   dialogRef = inject(DialogRef);
+
+  viewModel = signal({
+    description: '',
+    projectedAmount: 0,
+    actualAmount: 0,
+  });
+
+  constructor() {
+    this.viewModel.update((vm) => ({
+      ...vm,
+      description: this.dialogData.payload.description,
+      projectedAmount: this.dialogData.payload.projected.amount,
+      actualAmount: this.dialogData.payload.actual.amount,
+    }));
+  }
+
+  saveIncome(data: {
+    description: string;
+    projectedAmount: number;
+    actualAmount: number;
+  }) {
+    // validate here
+
+    const income: Income = {
+      ...this.dialogData.payload,
+      description: data.description,
+      projected: {
+        ...this.dialogData.payload.projected,
+        amount: data.projectedAmount,
+      },
+      actual: {
+        ...this.dialogData.payload.actual,
+        amount: data.actualAmount,
+      },
+      difference: {
+        ...this.dialogData.payload.projected,
+        amount: data.projectedAmount - data.actualAmount,
+      },
+    };
+
+    this.dialogRef.close(income);
+  }
 }
