@@ -315,10 +315,17 @@ export class DashboardPresenter {
       tap(() => console.log(JSON.stringify(income), ' saved')),
       delay(1000),
       tap((income) =>
-        this.budget.update((budget) => ({
-          ...budget,
-          incomes: [...budget.incomes, income],
-        }))
+        this.budget.update((budget) => {
+          const index = budget.incomes.findIndex((i) => i.id === income.id);
+          if (index > -1) {
+            budget.incomes[index] = income;
+          } else {
+            budget.incomes = [...budget.incomes, income];
+          }
+          return {
+            ...budget,
+          };
+        })
       )
     );
   }
@@ -412,6 +419,21 @@ export class AppShellComponent {
         take(1),
         filter(Boolean),
         concatMap((result) => this.#budgetService.addIncome(result as Income))
+      )
+      .subscribe();
+  }
+
+  editIncome(income: Income) {
+    const ref = this.openDialog({
+      title: 'Edit income',
+      payload: income,
+    });
+
+    ref.closed
+      .pipe(
+        take(1),
+        filter(Boolean),
+        concatMap((result) => this.#budgetService.editIncome(result as Income))
       )
       .subscribe();
   }
