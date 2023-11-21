@@ -26,3 +26,40 @@ export type Budget = {
   expenses: Expense[];
   date: Date;
 };
+
+export type ExpenseCategories =
+  | 'Housing'
+  | 'Transportation'
+  | 'Food'
+  | 'Utilities'
+  | 'Clothing'
+  | 'Medical/Health'
+  | 'Insurance'
+  | 'Household Items'
+  | 'Personal'
+  | 'Debt'
+  | 'Retirement'
+  | 'Education'
+  | 'Savings'
+  | 'Gifts/Donations'
+  | 'Entertainment'
+  | 'Miscellaneous';
+
+export const expenseCategories: ExpenseCategories[] = [
+  'Housing',
+  'Transportation',
+  'Food',
+  'Utilities',
+  'Clothing',
+  'Medical/Health',
+  'Insurance',
+  'Household Items',
+  'Personal',
+  'Debt',
+  'Retirement',
+  'Education',
+  'Savings',
+  'Gifts/Donations',
+  'Entertainment',
+  'Miscellaneous',
+];

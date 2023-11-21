@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   PipeTransform,
+  Type,
 } from '@angular/core';
 import { CommonModule, CurrencyPipe, JsonPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -19,6 +20,8 @@ import {
   Expense,
   Income,
   Money,
+  ExpenseCategories,
+  expenseCategories,
 } from '@snardev-clones/pmb/shared/models';
 import { FormsModule } from '@angular/forms';
 @Pipe({
@@ -367,7 +370,13 @@ export class DashboardPresenter {
   removeExpense(id: string) {
     return of(id).pipe(
       tap(() => console.log(id, ' removed')),
-      delay(1000)
+      delay(1000),
+      tap((id) =>
+        this.budget.update((budget) => ({
+          ...budget,
+          expenses: budget.expenses.filter((expense) => expense.id !== id),
+        }))
+      )
     );
   }
 }
@@ -392,8 +401,14 @@ export class AppShellComponent {
 
   viewModel = this.#budgetService.viewModel;
 
-  private openDialog(data: { title: string; payload: Income | Expense }) {
-    return this.#dialog.open(ManageIncomeComponent, {
+  private openDialog(
+    component: Type<unknown>,
+    data: {
+      title: string;
+      payload: Income | (Expense & { categories: ExpenseCategories[] });
+    }
+  ) {
+    return this.#dialog.open(component, {
       data: data,
     });
   }
@@ -415,7 +430,7 @@ export class AppShellComponent {
       },
       description: 'Dividend',
     };
-    const ref = this.openDialog({
+    const ref = this.openDialog(ManageIncomeComponent, {
       title: 'Add income',
       payload: income,
     });
@@ -430,7 +445,7 @@ export class AppShellComponent {
   }
 
   editIncome(income: Income) {
-    const ref = this.openDialog({
+    const ref = this.openDialog(ManageIncomeComponent, {
       title: 'Edit income',
       payload: income,
     });
@@ -462,9 +477,12 @@ export class AppShellComponent {
         currency: 'GBP',
       },
     };
-    const ref = this.openDialog({
+    const ref = this.openDialog(ManageExpenseComponent, {
       title: 'Add expense',
-      payload: expense,
+      payload: {
+        ...expense,
+        categories: expenseCategories,
+      },
     });
 
     ref.closed
@@ -476,8 +494,43 @@ export class AppShellComponent {
       .subscribe();
   }
 
+  editExpense(expense: Expense) {
+    const ref = this.openDialog(ManageExpenseComponent, {
+      title: 'Edit expense',
+      payload: {
+        ...expense,
+        categories: expenseCategories,
+      },
+    });
+
+    ref.closed
+      .pipe(
+        take(1),
+        filter(Boolean),
+        concatMap((result) =>
+          this.#budgetService.editExpense(result as Expense)
+        )
+      )
+      .subscribe();
+  }
+
   removeExpense(id: string) {
-    console.log(id);
+    const ref = this.#dialog.open(AlertComponent, {
+      data: {
+        id,
+        message: 'Are you sure you want to delete this expense?',
+      },
+    });
+
+    ref.closed
+      .pipe(
+        take(1),
+        filter(Boolean),
+        concatMap((result) =>
+          this.#budgetService.removeExpense(result as string)
+        )
+      )
+      .subscribe();
   }
   removeIncome(id: string) {
     const ref = this.#dialog.open(AlertComponent, {
@@ -636,5 +689,129 @@ export class ManageIncomeComponent {
     };
 
     this.dialogRef.close(income);
+  }
+}
+
+@Component({
+  template: `
+    <h2>{{ dialogData.title }}</h2>
+    <div>
+      <form #expenseForm="ngForm">
+        <div>
+          <label for="category">Category</label>
+          <select name="category" [ngModel]="viewModel().category">
+            @for(category of viewModel().categories; track category) {
+            <option [value]="category">
+              {{ category }}
+            </option>
+
+            }
+          </select>
+        </div>
+        <div>
+          <label for="description">Description</label>
+          <input
+            type="text"
+            name="description"
+            [ngModel]="viewModel().description"
+          />
+        </div>
+        <div>
+          <label for="projected">Projected</label>
+          <input
+            type="number"
+            name="projectedAmount"
+            [ngModel]="viewModel().projectedAmount"
+          />
+        </div>
+        <div>
+          <label for="actual">Actual</label>
+          <input
+            type="number"
+            name="actualAmount"
+            [ngModel]="viewModel().actualAmount"
+          />
+        </div>
+      </form>
+    </div>
+    <div class="flex justify-end">
+      <div class="space-x-4">
+        <button
+          type="button"
+          class="rounded-md bg-yellow-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600"
+          (click)="saveExpense(expenseForm.value)"
+        >
+          Save
+        </button>
+        <button
+          type="button"
+          (click)="dialogRef.close()"
+          class="rounded-md bg-yellow-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  `,
+  styles: `
+    :host {
+      display: block;
+      @apply bg-white p-6;
+    }
+  `,
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, JsonPipe],
+})
+export class ManageExpenseComponent {
+  dialogData = inject(DIALOG_DATA);
+  dialogRef = inject(DialogRef);
+
+  viewModel = signal({
+    categories: [] as ExpenseCategories[],
+    category: '',
+    description: '',
+    projectedAmount: 0,
+    actualAmount: 0,
+  });
+
+  constructor() {
+    this.viewModel.update((vm) => ({
+      ...vm,
+      categories: this.dialogData.payload.categories,
+      category: this.dialogData.payload.category,
+      description: this.dialogData.payload.description,
+      projectedAmount: this.dialogData.payload.projected.amount,
+      actualAmount: this.dialogData.payload.actual.amount,
+    }));
+  }
+
+  saveExpense(expenseFormData: {
+    category: string;
+    description: string;
+    projectedAmount: number;
+    actualAmount: number;
+  }) {
+    // validate here
+
+    const expense: Expense = {
+      ...this.dialogData.payload,
+      category: expenseFormData.category,
+      description: expenseFormData.description,
+      projected: {
+        ...this.dialogData.payload.projected,
+        amount: expenseFormData.projectedAmount,
+      },
+      actual: {
+        ...this.dialogData.payload.actual,
+        amount: expenseFormData.actualAmount,
+      },
+      difference: {
+        ...this.dialogData.payload.projected,
+        amount: expenseFormData.projectedAmount - expenseFormData.actualAmount,
+      },
+    };
+
+    this.dialogRef.close(expense);
   }
 }
