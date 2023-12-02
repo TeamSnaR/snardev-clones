@@ -15,7 +15,7 @@ export class AppComponent {
 
   viewModel = computed(() => ({
     url: this.#url(),
-    embedCode: this.generate(this.#url()),
+    embedCode: this.#embedCode(),
   }));
 
   generate(url: string) {
@@ -26,7 +26,8 @@ export class AppComponent {
       url.lastIndexOf('/')
     );
 
-    // generate embed code
-    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    this.#embedCode.update(
+      () => `https://drive.google.com/uc?export=view&id=${fileId}`
+    );
   }
 }
