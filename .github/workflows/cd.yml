@@ -37,7 +37,7 @@ jobs:
           password: ${{ secrets.DEPLOYER_PW }}
           source: clone-artifacts
           target: ${{ secrets.DESTINATION_TMP_DIR }}
-      - name: Deploy pmb
+      - name: Deploy pmb app
         uses: appleboy/ssh-action@v0.1.4
         if: contains(env.FILES_LIST, 'personal-monthly-budget')
         with:
@@ -52,7 +52,7 @@ jobs:
           script: |
             rm -rfv ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app/*
             cp -r -f ${{ secrets.DESTINATION_TMP_DIR }}/clone-artifacts/personal-monthly-budget/browser/* ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app
-      - name: Deploy gdrive-embedder
+      - name: Deploy gdrive-embedder app
         uses: appleboy/ssh-action@v0.1.4
         if: contains(env.FILES_LIST, 'gdrive-embedder')
         with:
