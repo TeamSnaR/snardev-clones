@@ -12,7 +12,7 @@
     <button (click)="generate(embedUrl.value)">Generate</button>
   </div>
   <div>
-    <h2>Result</h2>
+    <h2>Resulting image</h2>
     <figure>
       <img [src]="viewModel().embedCode" alt="alt for image" />
       <figcaption>{{ viewModel().embedCode }}</figcaption>

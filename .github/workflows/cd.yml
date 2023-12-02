@@ -7,13 +7,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Set the selected branch as an environment variable
+        run: echo "SELECTED_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Download artifact
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: ci.yml
           # Optional, will use the specified branch. Defaults to all branches
-          branch: main
+          branch: ${{ env.SELECTED_BRANCH }}
           name: clone-artifacts
           # Optional, a directory where to extract artifact(s), defaults to the current directory
           path: clone-artifacts
@@ -37,7 +39,7 @@ jobs:
           password: ${{ secrets.DEPLOYER_PW }}
           source: clone-artifacts
           target: ${{ secrets.DESTINATION_TMP_DIR }}
-      - name: Deploy pmb
+      - name: Deploy pmb app
         uses: appleboy/ssh-action@v0.1.4
         if: contains(env.FILES_LIST, 'personal-monthly-budget')
         with:
@@ -52,7 +54,7 @@ jobs:
           script: |
             rm -rfv ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app/*
             cp -r -f ${{ secrets.DESTINATION_TMP_DIR }}/clone-artifacts/personal-monthly-budget/browser/* ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app
-      - name: Deploy gdrive-embedder
+      - name: Deploy gdrive-embedder app
         uses: appleboy/ssh-action@v0.1.4
         if: contains(env.FILES_LIST, 'gdrive-embedder')
         with:

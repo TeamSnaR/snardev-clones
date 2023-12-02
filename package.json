@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "affected": "nx affected -t build,test,lint --base=origin/main --head=HEAD",
+    "affected": "nx affected -t build,test,lint --uncommitted",
+    "affected:committed": "nx affected -t build,test,lint --base=origin/main --head=HEAD",
     "start:pmb": "nx serve personal-monthly-budget",
     "start:gde": "nx serve gdrive-embedder"
   },
