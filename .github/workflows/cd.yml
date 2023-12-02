@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set the selected branch as an environment variable
-        run: echo "SELECTED_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "SELECTED_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - name: Download artifact
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
