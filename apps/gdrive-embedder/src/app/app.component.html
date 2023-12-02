@@ -1,0 +1,22 @@
+<h1>Welcome gdrive-embedder</h1>
+<div>
+  <div>
+    Google Drive URL:
+    <input
+      #embedUrl="ngModel"
+      name="url"
+      type="text"
+      [ngModel]="viewModel().url"
+      [ngModelOptions]="{ standalone: true }"
+    />
+    <button (click)="generate(embedUrl.value)">Generate</button>
+  </div>
+  <div>
+    <h2>Result</h2>
+    <figure>
+      <img [src]="viewModel().embedCode" alt="alt for image" />
+      <figcaption>{{ viewModel().embedCode }}</figcaption>
+    </figure>
+  </div>
+</div>
+<router-outlet></router-outlet>

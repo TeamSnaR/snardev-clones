@@ -1,0 +1,89 @@
+{
+  "name": "gdrive-embedder",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "gde",
+  "sourceRoot": "apps/gdrive-embedder/src",
+  "tags": ["scope:gdrive-embedder", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/gdrive-embedder",
+        "index": "apps/gdrive-embedder/src/index.html",
+        "browser": "apps/gdrive-embedder/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/gdrive-embedder/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          "apps/gdrive-embedder/src/favicon.ico",
+          "apps/gdrive-embedder/src/assets"
+        ],
+        "styles": ["apps/gdrive-embedder/src/styles.scss"],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "port": 4300
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "gdrive-embedder:build:production"
+        },
+        "development": {
+          "buildTarget": "gdrive-embedder:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "gdrive-embedder:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/gdrive-embedder/**/*.ts",
+          "apps/gdrive-embedder/**/*.html"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/gdrive-embedder/jest.config.ts"
+      }
+    }
+  }
+}

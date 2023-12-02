@@ -14,9 +14,14 @@ jobs:
           workflow: ci.yml
           # Optional, will use the specified branch. Defaults to all branches
           branch: main
-          name: pmb-artifacts
+          name: clone-artifacts
           # Optional, a directory where to extract artifact(s), defaults to the current directory
-          path: pmb-artifacts
+          path: clone-artifacts
+
+      - name: List sub-directories
+        run: |
+          FILES=$(ls -al clone-artifacts)
+          echo "FILES_LIST=$FILES" >> $GITHUB_ENV
 
       - name: SCP Command to Transfer Files
         # You may pin to the exact commit or the version.
@@ -30,10 +35,11 @@ jobs:
           username: ${{ secrets.DEPLOYER_USER }}
           # ssh password
           password: ${{ secrets.DEPLOYER_PW }}
-          source: pmb-artifacts
+          source: clone-artifacts
           target: ${{ secrets.DESTINATION_TMP_DIR }}
-      - name: Deploy app bits
+      - name: Deploy pmb
         uses: appleboy/ssh-action@v0.1.4
+        if: contains(env.FILES_LIST, 'personal-monthly-budget')
         with:
           host: ${{ secrets.DESTINATION_HOST }}
           # ssh port
@@ -45,4 +51,19 @@ jobs:
           script_stop: true
           script: |
             rm -rfv ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app/*
-            cp -r -f ${{ secrets.DESTINATION_TMP_DIR }}/pmb-artifacts/personal-monthly-budget/browser/* ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app
+            cp -r -f ${{ secrets.DESTINATION_TMP_DIR }}/clone-artifacts/personal-monthly-budget/browser/* ${{ secrets.DESTINATION_DIR }}/pmb/pmb-app
+      - name: Deploy gdrive-embedder
+        uses: appleboy/ssh-action@v0.1.4
+        if: contains(env.FILES_LIST, 'gdrive-embedder')
+        with:
+          host: ${{ secrets.DESTINATION_HOST }}
+          # ssh port
+          port: ${{ secrets.DESTINATION_PORT }}
+          # ssh username
+          username: ${{ secrets.DEPLOYER_USER }}
+          # ssh password
+          password: ${{ secrets.DEPLOYER_PW }}
+          script_stop: true
+          script: |
+            rm -rfv ${{ secrets.DESTINATION_DIR }}/gde/gde-app/*
+            cp -r -f ${{ secrets.DESTINATION_TMP_DIR }}/clone-artifacts/gdrive-embedder/browser/* ${{ secrets.DESTINATION_DIR }}/gde/gde-app

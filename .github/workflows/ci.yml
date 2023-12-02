@@ -27,7 +27,7 @@ jobs:
         npx nx affected --target=test --parallel=3 --ci --code-coverage
         npx nx affected --target=build --parallel=3
       artifacts-path: dist/apps
-      artifacts-name: pmb-artifacts
+      artifacts-name: clone-artifacts
 
   agents:
     name: Nx Cloud - Agents
