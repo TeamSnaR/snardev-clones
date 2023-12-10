@@ -2,63 +2,60 @@
 
 <div>
   <h2 class="text-3xl">Hello, Carl</h2>
-  <div>Your budget for {{ viewModel.budget().date | date : 'MMMM yyyy' }}</div>
+  <div>Your budget for {{ store.date() | date : 'MMMM yyyy' }}</div>
 </div>
 
 <div class="grid grid-cols-2 gap-4">
   <div class="p-4 border-2 rounded-md relative">
     <h2 class="text-xl text-gray-500">Projection</h2>
 
-    <div [ngClass]="viewModel.colors().projection">
+    <div [ngClass]="store.colors().projection">
       <span class="text-4xl">
-        {{ viewModel.projection().totalProjection | currencyExtended }}
+        {{ store.projection().totalProjection | currencyExtended }}
       </span>
     </div>
 
     <div>
       <div class="text-green-600">
-        + {{ viewModel.projection().totalProjectedIncome | currencyExtended }}
+        + {{ store.projection().totalProjectedIncome | currencyExtended }}
       </div>
       <div class="text-red-600">
-        - {{ viewModel.projection().totalProjectedExpenses | currencyExtended }}
+        - {{ store.projection().totalProjectedExpenses | currencyExtended }}
       </div>
     </div>
-    <div
-      [ngClass]="viewModel.colors().projection"
-      class="absolute top-6 right-4"
-    >
+    <div [ngClass]="store.colors().projection" class="absolute top-6 right-4">
       <span class="p-2 border rounded-md">
-        {{ viewModel.projection().badge }}
+        {{ store.projection().badge }}
       </span>
     </div>
   </div>
   <div class="p-4 border-2 rounded-md relative">
     <h2 class="text-xl text-base text-gray-500">Actual</h2>
-    <div [ngClass]="viewModel.colors().actual">
+    <div [ngClass]="store.colors().actual">
       <span class="text-4xl">
-        {{ viewModel.actual().totalActual | currencyExtended }}
+        {{ store.actual().totalActual | currencyExtended }}
       </span>
     </div>
     <div>
       <div class="text-green-600">
-        + {{ viewModel.actual().totalActualIncome | currencyExtended }}
+        + {{ store.actual().totalActualIncome | currencyExtended }}
       </div>
       <div class="text-red-600">
-        - {{ viewModel.actual().totalActualExpenses | currencyExtended }}
+        - {{ store.actual().totalActualExpenses | currencyExtended }}
       </div>
     </div>
-    <div [ngClass]="viewModel.colors().actual" class="absolute top-6 right-4">
+    <div [ngClass]="store.colors().actual" class="absolute top-6 right-4">
       <span class="p-2 border rounded-md">
-        {{ viewModel.actual().badge }}
+        {{ store.actual().badge }}
       </span>
     </div>
   </div>
   <div class="p-4 border-2 rounded-md col-span-2">
     <h2 class="text-xl text-gray-500">Balance</h2>
 
-    <div [ngClass]="viewModel.colors().balance">
+    <div [ngClass]="store.colors().balance">
       <span class="text-4xl">
-        {{ viewModel.balanceDifference().total | currencyExtended }}
+        {{ store.balanceDifference().total | currencyExtended }}
       </span>
     </div>
 
@@ -83,7 +80,7 @@
             </tr>
           </thead>
           <tbody>
-            @for(income of viewModel.budget().incomes; track income.id) {
+            @for(income of store.incomes(); track income.id) {
             <tr>
               <td>{{ income.description }}</td>
               <td class="text-right">
@@ -147,15 +144,15 @@
             </tr>
           </thead>
           <tbody>
-            @for(expenseCategory of viewModel.groupedExpenses().categories;
-            track expenseCategory) {
+            @for(expenseCategory of store.groupedExpenses().categories; track
+            expenseCategory) {
             <tr>
               <th colspan="5">
                 {{ expenseCategory }}
               </th>
             </tr>
             @for(expense of
-            viewModel.groupedExpenses().expenses.get(expenseCategory); track
+            store.groupedExpenses().expenses.get(expenseCategory); track
             expense.id) {
             <tr>
               <td>{{ expense.description }}</td>

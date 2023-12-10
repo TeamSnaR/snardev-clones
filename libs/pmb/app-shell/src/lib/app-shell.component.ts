@@ -12,7 +12,7 @@ import {
 import { CommonModule, CurrencyPipe, JsonPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
-import { concatMap, delay, filter, of, take, tap } from 'rxjs';
+import { EMPTY, concatMap, delay, filter, of, take, tap } from 'rxjs';
 import { IncomeListComponent } from '@snardev-clones/pmb/shared/ui/income-list';
 import { ExpenseListComponent } from '@snardev-clones/pmb/shared/ui/expense-list';
 import {
@@ -24,6 +24,7 @@ import {
   expenseCategories,
 } from '@snardev-clones/pmb/shared/models';
 import { FormsModule } from '@angular/forms';
+import { dashboardSignalStore } from './dashboard.store';
 @Pipe({
   name: 'currencyExtended',
   pure: true,
@@ -393,13 +394,11 @@ export class DashboardPresenter {
   ],
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [DashboardPresenter, CurrencyPipe],
+  viewProviders: [CurrencyPipe, dashboardSignalStore],
 })
 export class AppShellComponent {
   #dialog = inject(Dialog);
-  #budgetService = inject(DashboardPresenter);
-
-  viewModel = this.#budgetService.viewModel;
+  store = inject(dashboardSignalStore);
 
   private openDialog(
     component: Type<unknown>,
@@ -439,7 +438,10 @@ export class AppShellComponent {
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((result) => this.#budgetService.addIncome(result as Income))
+        concatMap((result) => {
+          this.store.saveIncome(result as Income);
+          return EMPTY;
+        })
       )
       .subscribe();
   }
@@ -454,7 +456,10 @@ export class AppShellComponent {
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((result) => this.#budgetService.editIncome(result as Income))
+        concatMap((result) => {
+          this.store.saveIncome(result as Income);
+          return EMPTY;
+        })
       )
       .subscribe();
   }
@@ -489,7 +494,10 @@ export class AppShellComponent {
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((result) => this.#budgetService.addExpense(result as Expense))
+        concatMap((result) => {
+          this.store.saveExpense(result as Expense);
+          return EMPTY;
+        })
       )
       .subscribe();
   }
@@ -507,9 +515,10 @@ export class AppShellComponent {
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((result) =>
-          this.#budgetService.editExpense(result as Expense)
-        )
+        concatMap((result) => {
+          this.store.saveExpense(result as Expense);
+          return EMPTY;
+        })
       )
       .subscribe();
   }
@@ -526,9 +535,10 @@ export class AppShellComponent {
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((result) =>
-          this.#budgetService.removeExpense(result as string)
-        )
+        concatMap((result) => {
+          this.store.removeExpense(result as string);
+          return EMPTY;
+        })
       )
       .subscribe();
   }
@@ -544,9 +554,10 @@ export class AppShellComponent {
       .pipe(
         take(1),
         filter(Boolean),
-        concatMap((result) =>
-          this.#budgetService.removeIncome(result as string)
-        )
+        concatMap((result) => {
+          this.store.removeIncome(result as string);
+          return EMPTY;
+        })
       )
       .subscribe();
   }
