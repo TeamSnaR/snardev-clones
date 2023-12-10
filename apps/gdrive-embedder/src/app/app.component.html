@@ -1,22 +1,26 @@
 <h1>Welcome gdrive-embedder</h1>
 <div>
+  <form
+    #embedForm="ngForm"
+    [ngFormOptions]="{ updateOn: 'blur' }"
+    (ngSubmit)="generate(embedForm)"
+  >
+    <label for="url">
+      Google Drive URL:
+      <input name="url" type="text" [ngModel]="viewModel().url" />
+    </label>
+    <label for="imageAlt">
+      Image Alt:
+      <input name="imageAlt" type="text" [ngModel]="viewModel().imageAlt" />
+    </label>
+    <button type="submit">Generate</button>
+  </form>
   <div>
-    Google Drive URL:
-    <input
-      #embedUrl="ngModel"
-      name="url"
-      type="text"
-      [ngModel]="viewModel().url"
-      [ngModelOptions]="{ standalone: true }"
-    />
-    <button (click)="generate(embedUrl.value)">Generate</button>
-  </div>
-  <div>
-    <h2>Resulting image</h2>
-    <figure>
-      <img [src]="viewModel().embedCode" alt="alt for image" />
-      <figcaption>{{ viewModel().embedCode }}</figcaption>
-    </figure>
+    <h2>Result</h2>
+    <button type="button" (click)="copy()">Copy</button>
+    <pre>
+      {{ viewModel().embedCode }}
+    </pre>
   </div>
 </div>
 <router-outlet></router-outlet>
