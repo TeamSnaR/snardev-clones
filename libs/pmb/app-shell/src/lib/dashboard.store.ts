@@ -14,20 +14,36 @@ import { DashboardService } from './dashboard.service';
 import { tapResponse } from '@ngrx/operators';
 
 type DashboardState = {
-  budget: Budget | null;
+  budget: Budget;
   loading: boolean;
 };
-const initialState: DashboardState = {
-  budget: null,
+const DEFAULT_BUDGET: Budget = {
+  id: '',
+  incomes: [],
+  expenses: [],
+  date: new Date(),
+  projected: {
+    amount: 0.0,
+    currency: 'GBP',
+  },
+  actual: {
+    amount: 0.0,
+    currency: 'GBP',
+  },
+  difference: {
+    amount: 0.0,
+    currency: 'GBP',
+  },
+};
+const INITIAL_STATE: DashboardState = {
+  budget: DEFAULT_BUDGET,
   loading: true,
 };
 export const dashboardSignalStore = signalStore(
-  withState<DashboardState>(initialState),
+  withState<DashboardState>(INITIAL_STATE),
   withComputed(({ budget }) => ({
     projection: computed(() => {
-      const incomes = budget()?.incomes ?? [];
-      const expenses = budget()?.expenses ?? [];
-      const totalProjectedIncome = incomes.reduce(
+      const totalProjectedIncome = budget().incomes.reduce(
         (acc, income) => ({
           ...acc,
           amount: acc.amount + income.projected.amount,
@@ -37,7 +53,7 @@ export const dashboardSignalStore = signalStore(
           currency: 'GBP',
         }
       );
-      const totalProjectedExpenses = expenses.reduce(
+      const totalProjectedExpenses = budget().expenses.reduce(
         (acc, expense) => ({
           ...acc,
           amount: acc.amount + expense.projected.amount,
@@ -107,8 +123,7 @@ export const dashboardSignalStore = signalStore(
       };
     }),
     groupedExpenses: computed(() => {
-      const expenses = budget()?.expenses ?? [];
-      const groupedExpenses = expenses.reduce(
+      const groupedExpenses = budget().expenses.reduce(
         (acc, expense) => {
           if (!acc.categories.includes(expense.category)) {
             acc.categories.push(expense.category);
@@ -170,22 +185,23 @@ export const dashboardSignalStore = signalStore(
         tap((income) => console.log(JSON.stringify(income), ' saved')),
         delay(1000),
         tap((income: Income) => {
-          const incomes = store.budget()!.incomes ?? [];
-          const index = incomes.findIndex((i) => i.id === income.id);
+          const index = store
+            .budget()
+            .incomes.findIndex((i) => i.id === income.id);
 
           if (index === -1) {
             patchState(store, {
               budget: {
-                ...store.budget()!,
-                incomes: [...incomes, income],
+                ...store.budget(),
+                incomes: [...store.budget().incomes, income],
               },
             });
           } else {
-            incomes[index] = income;
+            store.budget().incomes[index] = income;
             patchState(store, {
               budget: {
                 ...store.budget()!,
-                incomes: [...incomes],
+                incomes: [...store.budget().incomes],
               },
             });
           }
@@ -197,11 +213,11 @@ export const dashboardSignalStore = signalStore(
         tap((id) => console.log(id, ' removed')),
         delay(1000),
         tap((id) => {
-          const incomes = store.budget()!.incomes ?? [];
+          const incomes = store.budget().incomes ?? [];
 
           patchState(store, {
             budget: {
-              ...store.budget()!,
+              ...store.budget(),
               incomes: incomes.filter((income) => income.id !== id),
             },
           });
@@ -213,22 +229,23 @@ export const dashboardSignalStore = signalStore(
         tap((expense) => console.log(JSON.stringify(expense), ' saved')),
         delay(1000),
         tap((expense: Expense) => {
-          const expenses = store.budget()!.expenses ?? [];
-          const index = expenses.findIndex((e) => e.id === expense.id);
+          const index = store
+            .budget()
+            .expenses.findIndex((e) => e.id === expense.id);
 
           if (index === -1) {
             patchState(store, {
               budget: {
-                ...store.budget()!,
-                expenses: [...expenses, expense],
+                ...store.budget(),
+                expenses: [...store.budget().expenses, expense],
               },
             });
           } else {
-            expenses[index] = expense;
+            store.budget().expenses[index] = expense;
             patchState(store, {
               budget: {
                 ...store.budget()!,
-                expenses: [...expenses],
+                expenses: [...store.budget().expenses],
               },
             });
           }
@@ -244,7 +261,7 @@ export const dashboardSignalStore = signalStore(
         delay(1000),
         tapResponse({
           next: (id) => {
-            const expenses = store.budget()!.expenses ?? [];
+            const expenses = store.budget().expenses ?? [];
             patchState(store, {
               budget: {
                 ...store.budget()!,
