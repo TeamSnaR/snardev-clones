@@ -2,7 +2,7 @@
 
 <div>
   <h2 class="text-3xl">Hello, Carl</h2>
-  <div>Your budget for {{ store.date() | date : 'MMMM yyyy' }}</div>
+  <div>Your budget for {{ store.budget()?.date | date : 'MMMM yyyy' }}</div>
 </div>
 
 <div class="grid grid-cols-2 gap-4">
@@ -80,7 +80,7 @@
             </tr>
           </thead>
           <tbody>
-            @for(income of store.incomes(); track income.id) {
+            @for(income of store.budget()?.incomes; track income.id) {
             <tr>
               <td>{{ income.description }}</td>
               <td class="text-right">

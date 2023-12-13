@@ -13,29 +13,21 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { DashboardService } from './dashboard.service';
 import { tapResponse } from '@ngrx/operators';
 
-const initialState: Budget = {
-  id: '',
-  projected: {
-    amount: 0,
-    currency: '',
-  },
-  actual: {
-    amount: 0,
-    currency: '',
-  },
-  difference: {
-    amount: 0,
-    currency: '',
-  },
-  incomes: [],
-  expenses: [],
-  date: new Date(),
+type DashboardState = {
+  budget: Budget | null;
+  loading: boolean;
+};
+const initialState: DashboardState = {
+  budget: null,
+  loading: true,
 };
 export const dashboardSignalStore = signalStore(
-  withState<Budget>(initialState),
-  withComputed((state) => ({
+  withState<DashboardState>(initialState),
+  withComputed(({ budget }) => ({
     projection: computed(() => {
-      const totalProjectedIncome = state.incomes().reduce(
+      const incomes = budget()?.incomes ?? [];
+      const expenses = budget()?.expenses ?? [];
+      const totalProjectedIncome = incomes.reduce(
         (acc, income) => ({
           ...acc,
           amount: acc.amount + income.projected.amount,
@@ -45,7 +37,7 @@ export const dashboardSignalStore = signalStore(
           currency: 'GBP',
         }
       );
-      const totalProjectedExpenses = state.expenses().reduce(
+      const totalProjectedExpenses = expenses.reduce(
         (acc, expense) => ({
           ...acc,
           amount: acc.amount + expense.projected.amount,
@@ -74,7 +66,9 @@ export const dashboardSignalStore = signalStore(
       };
     }),
     actual: computed(() => {
-      const totalActualIncome = state.incomes().reduce(
+      const incomes = budget()?.incomes ?? [];
+      const expenses = budget()?.expenses ?? [];
+      const totalActualIncome = incomes.reduce(
         (acc, income) => ({
           ...acc,
           amount: acc.amount + income.actual.amount,
@@ -84,7 +78,7 @@ export const dashboardSignalStore = signalStore(
           currency: 'GBP',
         }
       );
-      const totalActualExpenses = state.expenses().reduce(
+      const totalActualExpenses = expenses.reduce(
         (acc, expense) => ({
           ...acc,
           amount: acc.amount + expense.actual.amount,
@@ -113,7 +107,8 @@ export const dashboardSignalStore = signalStore(
       };
     }),
     groupedExpenses: computed(() => {
-      const groupedExpenses = state.expenses().reduce(
+      const expenses = budget()?.expenses ?? [];
+      const groupedExpenses = expenses.reduce(
         (acc, expense) => {
           if (!acc.categories.includes(expense.category)) {
             acc.categories.push(expense.category);
@@ -175,14 +170,24 @@ export const dashboardSignalStore = signalStore(
         tap((income) => console.log(JSON.stringify(income), ' saved')),
         delay(1000),
         tap((income: Income) => {
-          const index = store.incomes().findIndex((i) => i.id === income.id);
+          const incomes = store.budget()!.incomes ?? [];
+          const index = incomes.findIndex((i) => i.id === income.id);
 
           if (index === -1) {
-            patchState(store, { incomes: [...store.incomes(), income] });
+            patchState(store, {
+              budget: {
+                ...store.budget()!,
+                incomes: [...incomes, income],
+              },
+            });
           } else {
-            const incomes = store.incomes();
             incomes[index] = income;
-            patchState(store, { incomes: [...incomes] });
+            patchState(store, {
+              budget: {
+                ...store.budget()!,
+                incomes: [...incomes],
+              },
+            });
           }
         })
       )
@@ -191,11 +196,16 @@ export const dashboardSignalStore = signalStore(
       pipe(
         tap((id) => console.log(id, ' removed')),
         delay(1000),
-        tap((id) =>
+        tap((id) => {
+          const incomes = store.budget()!.incomes ?? [];
+
           patchState(store, {
-            incomes: store.incomes().filter((income) => income.id !== id),
-          })
-        )
+            budget: {
+              ...store.budget()!,
+              incomes: incomes.filter((income) => income.id !== id),
+            },
+          });
+        })
       )
     ),
     saveExpense: rxMethod<Expense>(
@@ -203,43 +213,69 @@ export const dashboardSignalStore = signalStore(
         tap((expense) => console.log(JSON.stringify(expense), ' saved')),
         delay(1000),
         tap((expense: Expense) => {
-          const index = store.expenses().findIndex((e) => e.id === expense.id);
+          const expenses = store.budget()!.expenses ?? [];
+          const index = expenses.findIndex((e) => e.id === expense.id);
 
           if (index === -1) {
             patchState(store, {
-              expenses: [...store.expenses(), expense],
+              budget: {
+                ...store.budget()!,
+                expenses: [...expenses, expense],
+              },
             });
           } else {
-            const expenses = store.expenses();
             expenses[index] = expense;
-            patchState(store, { expenses: [...expenses] });
+            patchState(store, {
+              budget: {
+                ...store.budget()!,
+                expenses: [...expenses],
+              },
+            });
           }
         })
       )
     ),
     removeExpense: rxMethod<string>(
       pipe(
-        tap((id) => console.log(id, ' removed')),
+        tap((id) => {
+          console.log(id, ' removed');
+          patchState(store, { loading: true });
+        }),
         delay(1000),
-        tap((id) =>
-          patchState(store, {
-            expenses: store.expenses().filter((expense) => expense.id !== id),
-          })
-        )
+        tapResponse({
+          next: (id) => {
+            const expenses = store.budget()!.expenses ?? [];
+            patchState(store, {
+              budget: {
+                ...store.budget()!,
+                expenses: expenses.filter((expense) => expense.id !== id),
+              },
+            });
+          },
+          error: (error) => {
+            console.warn(error);
+          },
+          finalize: () => {
+            patchState(store, { loading: false });
+          },
+        })
       )
     ),
     getBudget: rxMethod<void>(
       pipe(
+        tap(() => patchState(store, { loading: true })),
         concatMap(() =>
           dashboardService.getBudget().pipe(
             tapResponse({
               next: (budget) => {
-                patchState(store, { ...budget });
+                patchState(store, { budget });
               },
               error: (error) => {
                 console.warn(error);
               },
-              finalize: () => {},
+              finalize: () => {
+                patchState(store, { loading: false });
+              },
             })
           )
         )
