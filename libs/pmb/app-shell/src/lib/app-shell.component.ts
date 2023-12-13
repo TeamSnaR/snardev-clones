@@ -25,6 +25,7 @@ import {
 } from '@snardev-clones/pmb/shared/models';
 import { FormsModule } from '@angular/forms';
 import { dashboardSignalStore } from './dashboard.store';
+import { DashboardService } from './dashboard.service';
 @Pipe({
   name: 'currencyExtended',
   pure: true,
@@ -394,7 +395,7 @@ export class DashboardPresenter {
   ],
   templateUrl: './app-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [CurrencyPipe, dashboardSignalStore],
+  viewProviders: [CurrencyPipe, dashboardSignalStore, DashboardService],
 })
 export class AppShellComponent {
   #dialog = inject(Dialog);

@@ -1,135 +1,35 @@
-import { computed } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import {
   patchState,
   signalStore,
   withComputed,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
 import { Budget, Expense, Income } from '@snardev-clones/pmb/shared/models';
-import { delay, pipe, tap } from 'rxjs';
+import { concatMap, delay, pipe, tap } from 'rxjs';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { DashboardService } from './dashboard.service';
+import { tapResponse } from '@ngrx/operators';
 
 const initialState: Budget = {
-  id: '1',
-  date: new Date(2023, 10),
+  id: '',
   projected: {
-    amount: 100,
-    currency: 'GBP',
+    amount: 0,
+    currency: '',
   },
   actual: {
-    amount: 100,
-    currency: 'GBP',
+    amount: 0,
+    currency: '',
   },
   difference: {
     amount: 0,
-    currency: 'GBP',
+    currency: '',
   },
-  incomes: [
-    {
-      id: '1',
-      projected: {
-        amount: 100,
-        currency: 'GBP',
-      },
-      actual: {
-        amount: 100,
-        currency: 'GBP',
-      },
-      difference: {
-        amount: 20,
-        currency: 'GBP',
-      },
-      description: 'Salary',
-    },
-  ],
-  expenses: [
-    {
-      id: '1',
-      category: 'Housing',
-      projected: {
-        amount: 50,
-        currency: 'GBP',
-      },
-      actual: {
-        amount: 50,
-        currency: 'GBP',
-      },
-      difference: {
-        amount: 0,
-        currency: 'GBP',
-      },
-      description: 'Rent',
-    },
-    {
-      id: '3',
-      category: 'Housing',
-      projected: {
-        amount: 100,
-        currency: 'GBP',
-      },
-      actual: {
-        amount: 90,
-        currency: 'GBP',
-      },
-      difference: {
-        amount: 0,
-        currency: 'GBP',
-      },
-      description: 'Council Tax',
-    },
-    {
-      id: '4',
-      category: 'Utilities',
-      projected: {
-        amount: 50,
-        currency: 'GBP',
-      },
-      actual: {
-        amount: 40,
-        currency: 'GBP',
-      },
-      difference: {
-        amount: 0,
-        currency: 'GBP',
-      },
-      description: 'Electricity',
-    },
-    {
-      id: '5',
-      category: 'Utilities',
-      projected: {
-        amount: 100,
-        currency: 'GBP',
-      },
-      actual: {
-        amount: 90,
-        currency: 'GBP',
-      },
-      difference: {
-        amount: 0,
-        currency: 'GBP',
-      },
-      description: 'Gas',
-    },
-    {
-      id: '6',
-      category: 'Utilities',
-      projected: {
-        amount: 100,
-        currency: 'GBP',
-      },
-      actual: {
-        amount: 90,
-        currency: 'GBP',
-      },
-      difference: {
-        amount: 0,
-        currency: 'GBP',
-      },
-      description: 'Water',
-    },
-  ],
+  incomes: [],
+  expenses: [],
+  date: new Date(),
 };
 export const dashboardSignalStore = signalStore(
   withState<Budget>(initialState),
@@ -269,7 +169,7 @@ export const dashboardSignalStore = signalStore(
       };
     }),
   })),
-  withMethods(({ ...store }) => ({
+  withMethods((store, dashboardService = inject(DashboardService)) => ({
     saveIncome: rxMethod<Income>(
       pipe(
         tap((income) => console.log(JSON.stringify(income), ' saved')),
@@ -328,5 +228,27 @@ export const dashboardSignalStore = signalStore(
         )
       )
     ),
-  }))
+    getBudget: rxMethod<void>(
+      pipe(
+        concatMap(() =>
+          dashboardService.getBudget().pipe(
+            tapResponse({
+              next: (budget) => {
+                patchState(store, { ...budget });
+              },
+              error: (error) => {
+                console.warn(error);
+              },
+              finalize: () => {},
+            })
+          )
+        )
+      )
+    ),
+  })),
+  withHooks({
+    onInit({ getBudget }) {
+      getBudget();
+    },
+  })
 );
