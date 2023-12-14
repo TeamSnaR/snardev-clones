@@ -8,7 +8,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { Budget, Expense, Income } from '@snardev-clones/pmb/shared/models';
-import { concatMap, delay, pipe, tap } from 'rxjs';
+import { concatMap, delay, map, pipe, tap } from 'rxjs';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { DashboardService } from './dashboard.service';
 import { tapResponse } from '@ngrx/operators';
@@ -182,29 +182,40 @@ export const dashboardSignalStore = signalStore(
   withMethods((store, dashboardService = inject(DashboardService)) => ({
     saveIncome: rxMethod<Income>(
       pipe(
-        tap((income) => console.log(JSON.stringify(income), ' saved')),
-        delay(1000),
-        tap((income: Income) => {
-          const index = store
-            .budget()
-            .incomes.findIndex((i) => i.id === income.id);
-
-          if (index === -1) {
-            patchState(store, {
-              budget: {
-                ...store.budget(),
-                incomes: [...store.budget().incomes, income],
-              },
-            });
-          } else {
-            store.budget().incomes[index] = income;
-            patchState(store, {
-              budget: {
-                ...store.budget()!,
-                incomes: [...store.budget().incomes],
-              },
-            });
-          }
+        concatMap((income) =>
+          dashboardService
+            .saveIncome(income)
+            .pipe(map((id: string) => ({ ...income, id })))
+        ),
+        tapResponse({
+          next: (income: Income) => {
+            const index = store
+              .budget()
+              .incomes.findIndex((i) => i.id === income.id);
+            console.log('index: ', income);
+            if (index === -1) {
+              patchState(store, {
+                budget: {
+                  ...store.budget(),
+                  incomes: [...store.budget().incomes, income],
+                },
+              });
+            } else {
+              store.budget().incomes[index] = income;
+              patchState(store, {
+                budget: {
+                  ...store.budget(),
+                  incomes: [...store.budget().incomes],
+                },
+              });
+            }
+          },
+          error: (error) => {
+            console.warn(error);
+          },
+          finalize: () => {
+            patchState(store, { loading: false });
+          },
         })
       )
     ),
@@ -285,6 +296,7 @@ export const dashboardSignalStore = signalStore(
           dashboardService.getBudget().pipe(
             tapResponse({
               next: (budget) => {
+                console.log(budget);
                 patchState(store, { budget });
               },
               error: (error) => {

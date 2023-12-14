@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 
 import { AppService } from './app.service';
 
@@ -14,5 +14,28 @@ export class AppController {
   @Get('budget')
   getBudget() {
     return this.appService.getBudget();
+  }
+
+  @Post('budget/incomes')
+  saveIncome(
+    @Body()
+    saveIncomeDto: {
+      id: string;
+      projected: {
+        amount: number;
+        currency: string;
+      };
+      actual: {
+        amount: number;
+        currency: string;
+      };
+      difference: {
+        amount: number;
+        currency: string;
+      };
+      description: string;
+    }
+  ) {
+    return this.appService.saveIncome(saveIncomeDto);
   }
 }

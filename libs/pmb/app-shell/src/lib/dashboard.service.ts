@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Budget } from '@snardev-clones/pmb/shared/models';
-import { EMPTY, Observable } from 'rxjs';
+import { Budget, Income } from '@snardev-clones/pmb/shared/models';
+import { EMPTY, Observable, map } from 'rxjs';
 
 @Injectable()
 export class DashboardService {
@@ -10,8 +10,10 @@ export class DashboardService {
     return this.httpClient.get<Budget>('api/budget');
   }
 
-  saveIncome(): Observable<void> {
-    return EMPTY;
+  saveIncome(income: Income): Observable<string> {
+    return this.httpClient
+      .post<{ id: string }>('api/budget/incomes', income)
+      .pipe(map((response: { id: string }) => response.id));
   }
 
   removeIncome(): Observable<void> {

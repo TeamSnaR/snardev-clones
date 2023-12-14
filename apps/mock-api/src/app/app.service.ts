@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   #budget = {
-    id: '1',
+    id: '1abc',
     date: new Date(2023, 10),
     projected: {
       amount: 0,
@@ -19,7 +19,7 @@ export class AppService {
     },
     incomes: [
       {
-        id: '1',
+        id: '1xyz',
         projected: {
           amount: 150,
           currency: 'GBP',
@@ -37,7 +37,7 @@ export class AppService {
     ],
     expenses: [
       {
-        id: '1',
+        id: '1dde',
         category: 'Housing',
         projected: {
           amount: 50,
@@ -61,5 +61,34 @@ export class AppService {
 
   getBudget() {
     return this.#budget;
+  }
+
+  saveIncome(saveIncomeDto: {
+    id: string;
+    projected: {
+      amount: number;
+      currency: string;
+    };
+    actual: {
+      amount: number;
+      currency: string;
+    };
+    difference: {
+      amount: number;
+      currency: string;
+    };
+    description: string;
+  }) {
+    const existingIndex = this.#budget.incomes.findIndex(
+      (f) => f.id === saveIncomeDto.id
+    );
+
+    if (existingIndex > -1) {
+      console.log('existingIndex', existingIndex);
+      this.#budget.incomes[existingIndex] = saveIncomeDto;
+    } else {
+      this.#budget.incomes.push(saveIncomeDto);
+    }
+    return { id: saveIncomeDto.id };
   }
 }
