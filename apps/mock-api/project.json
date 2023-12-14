@@ -1,0 +1,53 @@
+{
+  "name": "mock-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/mock-api/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/mock-api",
+        "main": "apps/mock-api/src/main.ts",
+        "tsConfig": "apps/mock-api/tsconfig.app.json",
+        "assets": ["apps/mock-api/src/assets"],
+        "webpackConfig": "apps/mock-api/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "mock-api:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "mock-api:build:development"
+        },
+        "production": {
+          "buildTarget": "mock-api:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/mock-api/jest.config.ts"
+      }
+    }
+  },
+  "tags": ["scope:mock-api", "type:app"]
+}
