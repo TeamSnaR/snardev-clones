@@ -221,17 +221,27 @@ export const dashboardSignalStore = signalStore(
     ),
     removeIncome: rxMethod<string>(
       pipe(
-        tap((id) => console.log(id, ' removed')),
-        delay(1000),
-        tap((id) => {
-          const incomes = store.budget().incomes ?? [];
+        tap(() => patchState(store, { loading: true })),
+        concatMap((id) =>
+          dashboardService.removeIncome(id).pipe(map(() => id))
+        ),
+        tapResponse({
+          next: (id) => {
+            const incomes = store.budget().incomes ?? [];
 
-          patchState(store, {
-            budget: {
-              ...store.budget(),
-              incomes: incomes.filter((income) => income.id !== id),
-            },
-          });
+            patchState(store, {
+              budget: {
+                ...store.budget(),
+                incomes: incomes.filter((income) => income.id !== id),
+              },
+            });
+          },
+          error: (error) => {
+            console.warn(error);
+          },
+          finalize: () => {
+            patchState(store, { loading: false });
+          },
         })
       )
     ),

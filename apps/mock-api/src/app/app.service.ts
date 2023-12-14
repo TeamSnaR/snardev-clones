@@ -84,11 +84,14 @@ export class AppService {
     );
 
     if (existingIndex > -1) {
-      console.log('existingIndex', existingIndex);
       this.#budget.incomes[existingIndex] = saveIncomeDto;
     } else {
       this.#budget.incomes.push(saveIncomeDto);
     }
     return { id: saveIncomeDto.id };
+  }
+
+  removeIncome(id: string) {
+    this.#budget.incomes = this.#budget.incomes.filter((f) => f.id !== id);
   }
 }

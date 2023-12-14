@@ -16,8 +16,8 @@ export class DashboardService {
       .pipe(map((response: { id: string }) => response.id));
   }
 
-  removeIncome(): Observable<void> {
-    return EMPTY;
+  removeIncome(id: string): Observable<void> {
+    return this.httpClient.delete<void>(`api/budget/incomes/${id}`);
   }
 
   saveExpense(): Observable<void> {
