@@ -43,4 +43,19 @@ export class AppController {
   removeIncome(@Param('id') id: string) {
     return this.appService.removeIncome(id);
   }
+
+  @Post('budget/expenses')
+  saveExpense(
+    @Body()
+    saveExpenseDto: {
+      id: string;
+      category: string;
+      projected: { amount: number; currency: string };
+      actual: { amount: number; currency: string };
+      difference: { amount: number; currency: string };
+      description: string;
+    }
+  ) {
+    return this.appService.saveExpense(saveExpenseDto);
+  }
 }

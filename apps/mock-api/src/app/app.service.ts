@@ -94,4 +94,25 @@ export class AppService {
   removeIncome(id: string) {
     this.#budget.incomes = this.#budget.incomes.filter((f) => f.id !== id);
   }
+
+  saveExpense(saveExpenseDto: {
+    id: string;
+    category: string;
+    projected: { amount: number; currency: string };
+    actual: { amount: number; currency: string };
+    difference: { amount: number; currency: string };
+    description: string;
+  }) {
+    const existingIndex = this.#budget.expenses.findIndex(
+      (expense) => expense.id === saveExpenseDto.id
+    );
+
+    if (existingIndex > -1) {
+      this.#budget.expenses[existingIndex] = saveExpenseDto;
+    } else {
+      this.#budget.expenses.push(saveExpenseDto);
+    }
+
+    return { id: saveExpenseDto.id };
+  }
 }

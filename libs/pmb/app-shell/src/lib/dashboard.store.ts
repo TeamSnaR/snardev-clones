@@ -247,29 +247,41 @@ export const dashboardSignalStore = signalStore(
     ),
     saveExpense: rxMethod<Expense>(
       pipe(
-        tap((expense) => console.log(JSON.stringify(expense), ' saved')),
-        delay(1000),
-        tap((expense: Expense) => {
-          const index = store
-            .budget()
-            .expenses.findIndex((e) => e.id === expense.id);
+        tap(() => patchState(store, { loading: true })),
+        concatMap((expense) =>
+          dashboardService
+            .saveExpense(expense)
+            .pipe(map((id: string) => ({ ...expense, id })))
+        ),
+        tapResponse({
+          next: (expense: Expense) => {
+            const index = store
+              .budget()
+              .expenses.findIndex((e) => e.id === expense.id);
 
-          if (index === -1) {
-            patchState(store, {
-              budget: {
-                ...store.budget(),
-                expenses: [...store.budget().expenses, expense],
-              },
-            });
-          } else {
-            store.budget().expenses[index] = expense;
-            patchState(store, {
-              budget: {
-                ...store.budget()!,
-                expenses: [...store.budget().expenses],
-              },
-            });
-          }
+            if (index === -1) {
+              patchState(store, {
+                budget: {
+                  ...store.budget(),
+                  expenses: [...store.budget().expenses, expense],
+                },
+              });
+            } else {
+              store.budget().expenses[index] = expense;
+              patchState(store, {
+                budget: {
+                  ...store.budget()!,
+                  expenses: [...store.budget().expenses],
+                },
+              });
+            }
+          },
+          error: (error) => {
+            console.warn(error);
+          },
+          finalize: () => {
+            patchState(store, { loading: false });
+          },
         })
       )
     ),
