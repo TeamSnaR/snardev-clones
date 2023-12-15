@@ -8,7 +8,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { Budget, Expense, Income } from '@snardev-clones/pmb/shared/models';
-import { concatMap, delay, map, pipe, tap } from 'rxjs';
+import { concatMap, map, pipe, tap } from 'rxjs';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { DashboardService } from './dashboard.service';
 import { tapResponse } from '@ngrx/operators';
@@ -287,11 +287,12 @@ export const dashboardSignalStore = signalStore(
     ),
     removeExpense: rxMethod<string>(
       pipe(
-        tap((id) => {
-          console.log(id, ' removed');
+        tap(() => {
           patchState(store, { loading: true });
         }),
-        delay(1000),
+        concatMap((id) =>
+          dashboardService.removeExpense(id).pipe(map(() => id))
+        ),
         tapResponse({
           next: (id) => {
             const expenses = store.budget().expenses ?? [];

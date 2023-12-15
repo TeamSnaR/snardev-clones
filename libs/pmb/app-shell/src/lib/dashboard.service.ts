@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Budget, Expense, Income } from '@snardev-clones/pmb/shared/models';
-import { EMPTY, Observable, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Injectable()
 export class DashboardService {
@@ -26,7 +26,7 @@ export class DashboardService {
       .pipe(map((response: { id: string }) => response.id));
   }
 
-  removeExpense(): Observable<void> {
-    return EMPTY;
+  removeExpense(id: string): Observable<void> {
+    return this.httpClient.delete<void>(`api/budget/expenses/${id}`);
   }
 }

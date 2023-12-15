@@ -115,4 +115,10 @@ export class AppService {
 
     return { id: saveExpenseDto.id };
   }
+
+  removeExpense(id: string) {
+    this.#budget.expenses = this.#budget.expenses.filter(
+      (exp) => exp.id !== id
+    );
+  }
 }

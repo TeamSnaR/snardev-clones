@@ -58,4 +58,9 @@ export class AppController {
   ) {
     return this.appService.saveExpense(saveExpenseDto);
   }
+
+  @Delete('budget/expenses/:id')
+  removeExpense(@Param('id') id: string) {
+    return this.appService.removeExpense(id);
+  }
 }
